@@ -8,9 +8,8 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    
     var employeeRepository: any RepositoryProtocol<Employee> {
-        get { self [EmployeeRepositoryKey.self] }
-        
+        get { self[EmployeeRepositoryKey.self] }
+        set { self[EmployeeRepositoryKey.self] = newValue }
     }
 }

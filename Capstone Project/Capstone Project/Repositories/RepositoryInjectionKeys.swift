@@ -8,5 +8,7 @@
 import SwiftUI
 
 struct EmployeeRepositoryKey: EnvironmentKey {
-    static let defaultValue: any RepositoryProtocol<Employee> = RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/employee")
+    static let defaultValue: any RepositoryProtocol<Employee> = RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/api")
 }
+
+

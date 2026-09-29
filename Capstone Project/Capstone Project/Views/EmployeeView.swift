@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct EmployeeList: View {
-    
-    @State private var viewModel: ViewModel
-    
+
+    @Environment(\.employeeRepository) var employeeRepository
+    @State var viewModel: ViewModel
+
     init(repository: any RepositoryProtocol<Employee>) {
-        viewModel = ViewModel(repository: repository)
-    }
+          _viewModel = State(wrappedValue: ViewModel(repository: repository))
+      }
     
     var body: some View {
         VStack {
@@ -194,5 +195,5 @@ extension EmployeeList {
 }
 
 #Preview {
-    EmployeeList(repository: RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/employee"))
+    ContentView()
 }

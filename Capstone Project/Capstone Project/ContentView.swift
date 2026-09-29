@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    
-    
-    var body: some View {
-        EmployeeList(repository: RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/api"))
-        }
-    }
+    @Environment(\.employeeRepository) private var employeeRepository
 
+    var body: some View {
+        EmployeeList(repository: employeeRepository)
+    }
+}
 
 #Preview {
     ContentView()
