@@ -9,26 +9,26 @@ import SwiftUI
 
 class Employee: Identifiable, Hashable, Codable {
     
-    let id: Int
+    let employeeId: Int
     let firstName: String
     let lastName: String
-    let title: String
-    let shift: Int
-    let department: String
-    let hireDate: Date
+    let title: String?
+    let shift: String?
+    let department: String?
+    let hireDate: Date?
     let jobTitle: String
     
     init (
-        id: Int,
+        employeeId: Int,
         firstName: String,
         lastName: String,
         title: String,
-        shift: Int,
+        shift: String,
         department: String,
         hireDate: Date,
         jobTitle: String
     ) {
-        self.id = id
+        self.employeeId = employeeId
         self.firstName = firstName
         self.lastName = lastName
         self.title = title

@@ -30,16 +30,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A260AC19306B0916005BAC78 /* Services */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Services;
-			sourceTree = "<group>";
-		};
-		A260AC1D306B09BF005BAC78 /* EmployeeDirectory */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EmployeeDirectory;
-			sourceTree = "<group>";
-		};
 		A28D99EA30671FEB00248D30 /* Capstone Project */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Capstone Project";
@@ -53,16 +43,6 @@
 		A28D9A0230671FED00248D30 /* Capstone ProjectUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Capstone ProjectUITests";
-			sourceTree = "<group>";
-		};
-		A28D9A123067200600248D30 /* Models */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Models;
-			sourceTree = "<group>";
-		};
-		A28D9A163067203700248D30 /* Repositories */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Repositories;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -95,10 +75,6 @@
 		A28D99DF30671FEB00248D30 = {
 			isa = PBXGroup;
 			children = (
-				A260AC1D306B09BF005BAC78 /* EmployeeDirectory */,
-				A260AC19306B0916005BAC78 /* Services */,
-				A28D9A163067203700248D30 /* Repositories */,
-				A28D9A123067200600248D30 /* Models */,
 				A28D99EA30671FEB00248D30 /* Capstone Project */,
 				A28D99F830671FED00248D30 /* Capstone ProjectTests */,
 				A28D9A0230671FED00248D30 /* Capstone ProjectUITests */,
@@ -132,11 +108,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A260AC19306B0916005BAC78 /* Services */,
-				A260AC1D306B09BF005BAC78 /* EmployeeDirectory */,
 				A28D99EA30671FEB00248D30 /* Capstone Project */,
-				A28D9A123067200600248D30 /* Models */,
-				A28D9A163067203700248D30 /* Repositories */,
 			);
 			name = "Capstone Project";
 			packageProductDependencies = (
