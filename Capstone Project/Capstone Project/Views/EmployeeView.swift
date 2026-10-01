@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct EmployeeList: View {
-
+    
     @Environment(\.employeeRepository) var employeeRepository
     @State var viewModel: ViewModel
-
+    
     init(repository: any RepositoryProtocol<Employee>) {
-          _viewModel = State(wrappedValue: ViewModel(repository: repository))
-      }
+        _viewModel = State(wrappedValue: ViewModel(repository: repository))
+    }
     
     var body: some View {
         VStack {
@@ -69,25 +69,27 @@ struct EmployeeList: View {
                 .padding(.vertical, 8)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    viewModel.selectedEmployee = employee
+                    withAnimation(.easeInOut) {
+                        viewModel.selectedEmployee = employee
+                    }
                 }
                 .listRowBackground(rowBackground(for: employee))
             }
             
-        
-        
-        .frame(maxWidth: .infinity)
-        
-        Divider()
-        
-        detailPanel
+            
+            
             .frame(maxWidth: .infinity)
-        
-    }
+            
+            Divider()
+            
+            detailPanel
+                .frame(maxWidth: .infinity)
+            
+        }
         .task {
             await viewModel.loadEmployees()
         }
-}
+    }
     private func rowBackground(for employee: Employee) -> Color {
         if viewModel.selectedEmployee?.id == employee.id {
             Color.gray.opacity(0.25)
@@ -102,66 +104,74 @@ struct EmployeeList: View {
     private var detailPanel: some View {
         if let employee = viewModel.selectedEmployee {
             VStack(spacing: 0) {
-                HStack {
-                    Text("Employee ID")
-                        .font(.subheadline).bold()
-                    Text(" - ")
-                    Spacer(minLength: 16)
-                    Text("\(employee.employeeId)")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.trailing)
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(height: 4)
+                    .frame(maxWidth: .infinity)
+                
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Employee ID")
+                            .font(.subheadline).bold()
+                        Text(" - ")
+                        Spacer(minLength: 16)
+                        Text("\(employee.employeeId)")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    
+                    .padding(.vertical, 8)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Job Title")
+                            .font(.subheadline).bold()
+                        Text(" - ")
+                        Spacer(minLength: 16)
+                        Text(employee.jobTitle)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    .padding(.vertical, 8)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Shift")
+                            .font(.subheadline).bold()
+                        Text(" - ")
+                        Spacer(minLength: 16)
+                        Text(employee.shift ?? "")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    .padding(.vertical, 8)
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Hire Date")
+                            .font(.subheadline).bold()
+                        Text("-")
+                        Spacer(minLength: 16)
+                        Text(employee.hireDate?.formatted(date: .abbreviated, time: .omitted) ?? "N/A")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.trailing)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+                .background(.background, in: RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal)
                 .padding(.vertical, 8)
-                
-                Divider()
-                
-                HStack {
-                    Text("Job Title")
-                        .font(.subheadline).bold()
-                    Text(" - ")
-                    Spacer(minLength: 16)
-                    Text(employee.jobTitle)
-                        .font(.subheadline)
-                        .multilineTextAlignment(.trailing)
-                }
-                .padding(.vertical, 8)
-                
-                Divider()
-                
-                HStack {
-                    Text("Shift")
-                        .font(.subheadline).bold()
-                    Text(" - ")
-                    Spacer(minLength: 16)
-                    Text(employee.shift ?? "")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.trailing)
-                }
-                .padding(.vertical, 8)
-                
-                Divider()
-                
-                HStack {
-                    Text("Hire Date")
-                        .font(.subheadline).bold()
-                    Text("-")
-                    Spacer(minLength: 16)
-                    Text(employee.hireDate?.formatted(date: .abbreviated, time: .omitted) ?? "N/A")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.trailing)
-                }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 4)
-            .background(.background, in: RoundedRectangle(cornerRadius: 12))
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+            .transition(.move(edge: .bottom))
+
         }
         
     }
-    
 }
-
 extension EmployeeList {
     
     @Observable
