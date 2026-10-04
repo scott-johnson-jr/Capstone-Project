@@ -37,6 +37,26 @@ final class APIClient {
             from: data
         )
     }
+    // MARK: - Dashboard Endpoints
+    
+    // removed "endpoint:" from funcs. Extraneous labels causing build errors
+
+    func fetchWeeklySales() async throws -> WeeklySales {
+        return try await get("/api/Dashboard/weekly-sales", responseType: WeeklySales.self)
+    }
+
+    func fetchBestWorstProducts() async throws -> BestWorstProducts {
+        return try await get("/api/Dashboard/best-worst", responseType: BestWorstProducts.self)
+    }
+
+    func fetchLowStock() async throws -> [LowStock] {
+        return try await get("/api/Dashboard/low-stock", responseType: [LowStock].self)
+    }
+
+    func fetchShifts() async throws -> [Shifts] {
+        return try await get("/api/Dashboard/shifts", responseType: [Shifts].self)
+    }
+    
 }
 enum APIError: Error {
     case invalidURL
