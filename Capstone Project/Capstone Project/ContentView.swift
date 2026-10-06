@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(\.inventoryRepository) private var inventoryRepository
     
     @State private var current: String = "welcome"
+    
     private let repository = RemoteDashboardRepository(apiClient: APIClient())
     
     var body: some View {
@@ -13,10 +14,8 @@ struct ContentView: View {
                 switch current {
                 case "employees":
                     EmployeeList(repository: employeeRepository)
-        Spacer()
+       
         
-        DashboardView()
-            .environment(\.dashboardRepository, repository)
                 case "inventory":
                     InventoryView(
                         viewModel: InventoryViewModel(repository: inventoryRepository)
