@@ -12,6 +12,11 @@ struct EmployeeRepositoryKey: EnvironmentKey {
     RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/api")
 }
 
+struct InventoryRepositoryKey: EnvironmentKey {
+    static let defaultValue: any InventoryRepositoryProtocol = InventoryRepository(
+        apiClient: APIClient()
+    )
+}
 
 
 struct DashboardRepositoryKey: EnvironmentKey {

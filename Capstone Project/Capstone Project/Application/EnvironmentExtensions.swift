@@ -12,6 +12,12 @@ extension EnvironmentValues {
         get { self[EmployeeRepositoryKey.self] }
         set { self[EmployeeRepositoryKey.self] = newValue }
     }
+    
+    var inventoryRepository: any InventoryRepositoryProtocol {
+        get { self[InventoryRepositoryKey.self] }
+        set { self[InventoryRepositoryKey.self] = newValue }
+    }
+    
 }
 
 extension EnvironmentValues {
