@@ -13,3 +13,10 @@ extension EnvironmentValues {
         set { self[EmployeeRepositoryKey.self] = newValue }
     }
 }
+
+extension EnvironmentValues {
+    var dashboardRepository: any DashboardRepositoryProtocol {
+        get { self[DashboardRepositoryKey.self] }
+        set { self[DashboardRepositoryKey.self] = newValue }
+    }
+}

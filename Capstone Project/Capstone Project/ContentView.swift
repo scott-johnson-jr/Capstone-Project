@@ -9,9 +9,15 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.employeeRepository) private var employeeRepository
-
+    
+    private let repository = RemoteDashboardRepository(apiClient: APIClient())
+    
     var body: some View {
         EmployeeList(repository: employeeRepository)
+        Spacer()
+        
+        DashboardView()
+            .environment(\.dashboardRepository, repository)
     }
 }
 

@@ -32,6 +32,12 @@ final class APIClient {
         guard 200..<300 ~= httpResponse.statusCode else {
             throw APIError.httpError(httpResponse.statusCode)
         }
+        // was running into errors and needed it implement additional code to identify -Blair
+        if let rawJSON = String(data: data, encoding: .utf8) {
+            print("Fetching URL: \(endpoint)")
+            print("Raw Response: \(rawJSON)")
+        }
+
         return try JSONDecoder().decode(
             T.self,
             from: data
@@ -39,14 +45,14 @@ final class APIClient {
     }
     // MARK: - Dashboard Endpoints
     
-    // removed "endpoint:" from funcs. Extraneous labels causing build errors
+    // removed "endpoint:" from funcs. Extraneous labels causing build errors and added square brackets for material requirements
 
-    func fetchWeeklySales() async throws -> WeeklySales {
-        return try await get("/api/Dashboard/weekly-sales", responseType: WeeklySales.self)
+    func fetchWeeklySales() async throws -> [WeeklySales] {
+        return try await get("/api/Dashboard/weekly-sales", responseType: [WeeklySales].self)
     }
 
-    func fetchBestWorstProducts() async throws -> BestWorstProducts {
-        return try await get("/api/Dashboard/best-worst", responseType: BestWorstProducts.self)
+    func fetchBestWorstProducts() async throws -> [BestWorstProducts] {
+        return try await get("/api/Dashboard/best-worst", responseType: [BestWorstProducts].self)
     }
 
     func fetchLowStock() async throws -> [LowStock] {

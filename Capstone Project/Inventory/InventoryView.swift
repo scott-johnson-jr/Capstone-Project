@@ -58,3 +58,6 @@ struct InventoryView: View {
 }
 
 
+//#Preview {
+//    InventoryView(viewModel: <#T##InventoryViewModel#>)
+//}
