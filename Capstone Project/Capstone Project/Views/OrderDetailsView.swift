@@ -75,20 +75,6 @@ struct OrderDetails: View {
                 .frame(maxWidth: .infinity)
                 .background(Color.mint.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
             
-            
-            HStack(spacing: 6) {
-                Text("Thank you for your purchase!")
-            }
-            .padding(32)
-            
-            Image(systemName: "checkmark.diamond.fill")
-                .resizable()
-                .scaledToFit()
-                .font(.largeTitle.bold())
-                .foregroundStyle(.green.opacity(0.5))
-                .symbolEffect(.breathe)
-            
-            Spacer()
         }
 
     }
