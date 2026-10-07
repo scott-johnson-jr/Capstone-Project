@@ -16,4 +16,11 @@ struct InventoryRepositoryKey: EnvironmentKey {
         apiClient: APIClient()
     )
 }
+    
+struct OrderRepositoryKey: EnvironmentKey {
+    static let defaultValue: any RepositoryProtocol<Order> =
+    RemoteOrderRepositoryDirectory(urlBase: "https://api.bootcampcentral.com/api")
+}
+    
+
 

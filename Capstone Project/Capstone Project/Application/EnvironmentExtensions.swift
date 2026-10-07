@@ -17,5 +17,9 @@ extension EnvironmentValues {
         get { self[InventoryRepositoryKey.self] }
         set { self[InventoryRepositoryKey.self] = newValue }
     }
+    var orderRepository: any RepositoryProtocol<Order> {
+        get { self[OrderRepositoryKey.self] }
+        set { self[OrderRepositoryKey.self] = newValue }
+    }
     
 }
