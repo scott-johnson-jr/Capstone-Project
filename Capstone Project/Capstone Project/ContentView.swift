@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.employeeRepository) private var employeeRepository
     @Environment(\.inventoryRepository) private var inventoryRepository
+    @Environment(\.orderRepository) private var orderRepository
     
     @State private var current: String = "welcome"
     
@@ -18,8 +19,10 @@ struct ContentView: View {
         
                 case "inventory":
                     InventoryView(
-                        viewModel: InventoryViewModel(repository: inventoryRepository)
-                    )
+                        viewModel: InventoryViewModel(repository: inventoryRepository))
+                case "orders":
+                    OrderList(repository: orderRepository)
+                        
                 case "dashboard":
                     DashboardView()
                         .environment(\.dashboardRepository, repository)
@@ -34,6 +37,7 @@ struct ContentView: View {
                         Divider()
                         Button("Employees") { current = "employees" }
                         Button("Inventory") { current = "inventory" }
+                        Button("Orders") { current = "orders" }
                         Button("Dashboard") { current = "dashboard" }
                     } label: {
                         Label("View", systemImage: "line.3.horizontal")

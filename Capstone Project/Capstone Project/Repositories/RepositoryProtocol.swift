@@ -10,7 +10,7 @@ protocol RepositoryProtocol<Item> {
     associatedtype Item: Identifiable, Codable
     
     func getAll() async throws -> [Item]
-    func getById(_ employeeId: Item.ID) async throws -> Item?
+    func getById(_ id: Item.ID) async throws -> Item?
 
     
     
