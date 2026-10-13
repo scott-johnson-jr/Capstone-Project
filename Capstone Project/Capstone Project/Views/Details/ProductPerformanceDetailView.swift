@@ -18,19 +18,14 @@ struct ProductPerformanceDetailView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Performance Ranking") {
                     ForEach(Array(sortedItems.enumerated()), id: \.element.id) { index, item in
-                        HStack{
-                            // rank number badge
-                            Text("#\(index + 1)")
-                                .font(.caption)
-                                .bold()
-                                .padding(6)
-                                .background(Color.blue.opacity(0.1))
+                        // changed alignment to .top so elements stay neat if text grows or wraps
+                        HStack(alignment: .top){
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.productName)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
+                                    .lineLimit(nil) // allows name to wrap down to a new line instead of truncating
                                 Text("ID: #\(item.productId)")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
@@ -45,16 +40,28 @@ struct ProductPerformanceDetailView: View {
                                 .padding(.vertical, 4)
                                 .background(Color(.tertiarySystemBackground))
                                 .cornerRadius(6)
+                                .fixedSize(horizontal: true, vertical: false) // gurantees the badge content never squishes
                         }
+                        // Combine elements into a single clean VoiceOver readout
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("\(item.productName): \(item.unitsSold) sold.")
                     }
-                }
+                
             }
             .navigationTitle("Product Performance")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Text("Done")
+                            .bold()
+                            .padding(.horizontal, 12)
+                            .padding(.vertical,8)
+                        // gurantees a physical 44x44 minimum touch targest area
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                 }
             }

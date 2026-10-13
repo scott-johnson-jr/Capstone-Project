@@ -45,6 +45,7 @@ struct ProductDetailView: View {
             Text(product.brand.uppercased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader) // NOTE: Identifies brand as a header for VoiceOver
             Text(product.name)
                 .font(.largeTitle.weight(.semibold))
             Text(product.summary)
@@ -59,6 +60,9 @@ struct ProductDetailView: View {
                     .font(.title3.weight(.semibold))
             }
             .font(.subheadline)
+            // NOTE: Combined rating and reviews for clean screen reader narration
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Rating: \(String(format: "%.1f", product.rating)) out of 5 stars, based on \(product.reviewCount) reviews, Price: \(product.price.currencyString)")
         }
     }
 
@@ -68,20 +72,34 @@ struct ProductDetailView: View {
                 .font(.subheadline.weight(.medium))
             HStack(spacing: 8) {
                 ForEach(product.colors, id: \.self) { color in
+                    let isSelected = selectedColor == color
                     Button {
                         selectedColor = color
                     } label: {
-                        Text(color)
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(
-                                selectedColor == color ? Color.primary : Color.cardBackground,
-                                in: Capsule()
-                            )
-                            .foregroundStyle(selectedColor == color ? Color.catalogBackground : .primary)
+                        HStack(spacing: 6) {
+                            // NOTE: Added checkmark for Color Independence so selection doesn't depend on background color alone
+                            if isSelected {
+                                Image(systemName: "checkmark")
+                                    .font(.subheadline.weight(.bold))
+                                    .accessibilityHidden(true)
+                            }
+                            Text(color)
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .frame(minHeight: 44) // NOTE: Ensures minimum 44pt touch target height requirement
+                        .background(
+                            isSelected ? Color.primary : Color.cardBackground,
+                            in: Capsule()
+                        )
+                        .foregroundStyle(isSelected ? Color.catalogBackground : .primary)
                     }
                     .buttonStyle(.plain)
+                    // NOTE: Accessibility traits and state hints for color selection buttons
+                    .accessibilityLabel("Color: \(color)")
+                    .accessibilityValue(isSelected ? "Selected" : "")
+                    .accessibilityAddTraits(.isButton)
                 }
             }
         }
@@ -98,6 +116,10 @@ struct ProductDetailView: View {
                 }
                 .font(.subheadline)
                 .padding(.vertical, 12)
+                // NOTE: Combined specification row so VoiceOver reads label and value as a single cohesive unit
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("\(spec.label): \(spec.value)")
+                
                 if spec.id != product.specs.last?.id {
                     Divider()
                 }
@@ -120,10 +142,14 @@ struct ProductDetailView: View {
         }
         .buttonStyle(.plain)
         .disabled(added)
+        .frame(minHeight: 44) // NOTE: Ensures minimum 44pt touch target height requirement for add to bag button
         .padding(.horizontal, 20)
         .padding(.top, 8)
         .padding(.bottom, 12)
         .background(.ultraThinMaterial)
+        // NOTE: Explicit accessibility labeling for add to bag action
+        .accessibilityLabel(added ? "Item added to bag" : "Add to bag, \(product.price.currencyString)")
+        .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -140,6 +166,8 @@ struct ProductMark: View {
                 product.accent.gradient,
                 in: RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
             )
+            // NOTE: Hides decorative product icon from VoiceOver as product details are conveyed in text
+            .accessibilityHidden(true)
     }
 }
 

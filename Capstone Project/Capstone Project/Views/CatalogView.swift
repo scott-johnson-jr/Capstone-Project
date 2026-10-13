@@ -60,6 +60,7 @@ struct CatalogView: View {
             Text("\(products.count) pieces")
                 .font(.title2.weight(.semibold))
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var categoryPicker: some View {
@@ -73,6 +74,7 @@ struct CatalogView: View {
                             .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
+                            .frame(minWidth: 44, minHeight: 44) // meets the minimum 44x44
                             .background(
                                 category == item ? Color.primary : Color.cardBackground,
                                 in: Capsule()
@@ -80,6 +82,9 @@ struct CatalogView: View {
                             .foregroundStyle(category == item ? Color.catalogBackground : .primary)
                     }
                     .buttonStyle(.plain)
+                    // announces to voiceover which item is selection state is active
+                    .accessibilityValue(category == item ? "Selected" : "")
+                    .accessibilityAddTraits(category == item ? .isSelected : [] )
                 }
             }
         }
@@ -100,7 +105,7 @@ struct ProductCard: View {
                 Text(product.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                    .lineLimit(1)
+                    .lineLimit(2) // safely allows 2 lines of text if Dynamic Type sizes expand layout
             }
             Text(product.price.currencyString)
                 .font(.subheadline.weight(.semibold))
@@ -108,6 +113,7 @@ struct ProductCard: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine) // marges layout info into single structural readout
     }
 }
 
