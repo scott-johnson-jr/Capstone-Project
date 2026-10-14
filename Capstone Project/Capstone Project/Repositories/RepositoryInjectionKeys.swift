@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct EmployeeRepositoryKey: EnvironmentKey {
-    static let defaultValue: any RepositoryProtocol<Employee> = RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/api")
+    static let defaultValue: any RepositoryProtocol<Employee> =
+    RemoteEmployeeDirectoryRepository(urlBase: "https://api.bootcampcentral.com/api")
 }
 
 struct InventoryRepositoryKey: EnvironmentKey {
@@ -21,6 +22,16 @@ struct OrderRepositoryKey: EnvironmentKey {
     static let defaultValue: any RepositoryProtocol<Order> =
     RemoteOrderRepositoryDirectory(urlBase: "https://api.bootcampcentral.com/api")
 }
-    
+
+struct DashboardRepositoryKey: EnvironmentKey {
+    static let defaultValue: any DashboardRepositoryProtocol = RemoteDashboardRepository(
+        apiClient: APIClient()
+    )
+}
+
+struct OrderProductRepositoryKey: EnvironmentKey {
+    static let defaultValue: any RepositoryProtocol<OrderProduct> =
+    RemoteOrderProductRepository(urlBase: "https://api.bootcampcentral.com/api")
+}
 
 

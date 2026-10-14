@@ -22,4 +22,16 @@ extension EnvironmentValues {
         set { self[OrderRepositoryKey.self] = newValue }
     }
     
+    var dashboardRepository: any DashboardRepositoryProtocol {
+        get { self[DashboardRepositoryKey.self] }
+        set { self[DashboardRepositoryKey.self] = newValue }
+    }
+    
+    var orderProductRepository: any RepositoryProtocol<OrderProduct> {
+        get { self[OrderProductRepositoryKey.self] }
+        set { self[OrderProductRepositoryKey.self] = newValue }
+    }
 }
+
+
+
