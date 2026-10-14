@@ -10,6 +10,7 @@ import SwiftUI
 struct OrderList: View {
     
     @Environment(\.orderRepository) var orderRepository
+    @Environment(\.orderProductRepository) var orderProductRepository
     @State var viewModel: ViewModel
     
     init(repository: any RepositoryProtocol<Order>) {
@@ -19,6 +20,7 @@ struct OrderList: View {
     var body: some View {
         VStack {
             BannerError(model: viewModel)
+            
             
             VStack(spacing: 6) {
                 Text("Orders")
@@ -32,6 +34,18 @@ struct OrderList: View {
                 
                 
                 HStack {
+                    Spacer()
+                    
+                    Text("Search")
+                    
+                    TextField("Name or Order #", text: $viewModel.filter)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding()
+                
+                HStack {
                     Text("Name")
                     Spacer(minLength: 16)
                     Text("Order Number")
@@ -43,6 +57,8 @@ struct OrderList: View {
             .padding(.horizontal, 32)
             .padding(.top, 8)
             .padding(.bottom, 4)
+            
+            
             
           
             
@@ -71,9 +87,13 @@ struct OrderList: View {
             }
             .task {
                 await viewModel.loadOrders()
+                await viewModel.loadProducts(using: orderProductRepository)
             }
         }
-        .navigationDestination(item: $viewModel.selectedOrder) { order in OrderDetails(order: order)
+        .navigationDestination(item: $viewModel.selectedOrder) { order in OrderDetails(
+            order: order,
+            product: viewModel.products.first { $0.name == order.productName }
+        )
         }
     }
     
@@ -104,14 +124,35 @@ extension OrderList {
         
         var orders: [Order] = [] {
             didSet {
+                filter = ""
                 selectedOrder = nil
+            }
+        }
+        var filter: String = "" {
+            didSet {
+                matchingOrders = orders.filter { order in
+                    filter.isEmpty ||
+                    "\(order.firstName) \(order.lastName)".lowercased().contains(filter.lowercased()) ||
+                    String(order.orderNumber).contains(filter)
+                }
+            }
+        }
+        
+        var matchingOrders: [Order] = [] {
+            didSet {
+                if let selected = selectedOrder,
+                   !matchingOrders.contains(selected) {
+                    selectedOrder = nil
+                }
             }
         }
         
         var selectedOrder: Order? = nil
         
+        var products: [OrderProduct] = []
+        
         var groupedOrder: [[Order]] {
-            Dictionary(grouping: orders, by: \.orderNumber)
+            Dictionary(grouping: matchingOrders, by: \.orderNumber)
                 .values
                 .sorted { $0[0].orderNumber < $1[0].orderNumber }
         }
@@ -124,5 +165,14 @@ extension OrderList {
                 errorMessage = "\(error)"
             }
         }
+        
+        func loadProducts(using repository: any RepositoryProtocol<OrderProduct>) async {
+            do {
+                products = try await repository.getAll()
+            } catch {
+                errorMessage = "\(error)"
+            }
+        }
+        
     }
 }

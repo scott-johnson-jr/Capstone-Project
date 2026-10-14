@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OrderDetails: View {
     let order: Order
+    let product: OrderProduct?
     
     var body: some View {
         VStack(spacing: 12) {
@@ -50,6 +51,15 @@ struct OrderDetails: View {
                     
                     Text("Item: \(order.productName)")
                         .font(Font.body.bold())
+                    
+                    if let data = product?.thumbnailPhoto, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 180, height: 180)
+                            
+                            
+                    }
                     
                     HStack {
                         Text("Quantity")
