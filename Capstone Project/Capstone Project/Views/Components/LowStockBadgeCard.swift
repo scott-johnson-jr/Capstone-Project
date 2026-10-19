@@ -19,30 +19,28 @@ struct LowStockBadgeCard: View {
     }
     
     var body: some View {
-        VStack{
-            Text("Low Stock Warnings!")
-                .font(.title)
-            HStack {
-                Text("\(count)")
-                Image(systemName: "exclamationmark.triangle.fill")
+        NavigationLink(destination: LowStockDetailView(lowStockItems: lowStock)) {
+            VStack{
+                Text("Low Stock Warnings!")
+                    .font(.title)
                 
+                HStack {
+                    Text("\(count)")
+                        .foregroundColor(.red)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                }
             }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(12)
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color.red.opacity(0.15))
-        .cornerRadius(12)
-        // interactive on tap
-        .onTapGesture {
-            isShowingDetail = true
-        }
-        .sheet(isPresented: $isShowingDetail) {
-            LowStockDetailView(lowStockItems: lowStock)
-        }
+        .accessibilityIdentifier("lowStockDashboardCard")
     }
-  
-        
-    }
+    
+    
+}
 
 
 
@@ -80,6 +78,6 @@ struct LowStockBadgeCard: View {
 }
 
 
-    
- 
-   
+
+
+
