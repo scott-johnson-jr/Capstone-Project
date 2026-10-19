@@ -32,10 +32,8 @@ struct DashboardView: View {
                 } else {
                     List {
                         // 1. Weekly Sales Card
-                
-                        if let latestSales = viewModel.weeklySales.first {
-                            WeeklySalesCard(sales: latestSales)
-                        }
+            
+                        WeeklySalesCard(dailySalesCard: viewModel.weeklySales)
                         
                         // 2. Low Stock Warning Card
                         LowStockBadgeCard(lowStock: viewModel.lowStock)
