@@ -43,6 +43,7 @@ struct LowStockDetailView: View {
             }
             .navigationTitle("Low Stock Inventory")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true) // hiding back button that auto shows from nav stack
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -55,6 +56,8 @@ struct LowStockDetailView: View {
                         // gurantees a physical 44x44 minimum touch targest area
                             .frame(minWidth: 44, minHeight: 44)
                             .contentShape(Rectangle())
+                        
+                        
                     }
                 }
             }
