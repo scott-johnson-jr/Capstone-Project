@@ -12,17 +12,17 @@ struct BestWorstSummaryCard: View {
     let bestWorstProducts: [BestWorstProducts]
     
     // Computed property to assign top seller
-    var bestProduct: BestWorstProducts? {
-        bestWorstProducts.max(by: { $0.unitsSold < $1.unitsSold })
+    var bestProduct: BestWorstProducts {
+        bestWorstProducts.max(by: { $0.unitsSold < $1.unitsSold })!
     }
 
     // Computed property to assign bottom seller
-    var worstProduct: BestWorstProducts? {
-        bestWorstProducts.min(by: { $0.unitsSold < $1.unitsSold })
+    var worstProduct: BestWorstProducts {
+        bestWorstProducts.min(by: { $0.unitsSold < $1.unitsSold })!
     }
     
     // State to manage the popup sheet presentation
-    @State private var isShowingDetail = false
+//    @State private var isShowingDetail = false
    
     
     var body: some View {
@@ -33,9 +33,14 @@ struct BestWorstSummaryCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2){
-                    Text(bestProduct?.productName ?? "N/A")
+                    Text(bestProduct.productName)
                         .lineLimit(1)
-                    Text("(\(bestProduct?.unitsSold ?? 0) sold)")
+                    HStack {
+                        Text("ID:")
+                        Text("\(bestProduct.productId)")
+                        Text("(\(bestProduct.unitsSold) sold)")
+                    }
+                    
                 }
             }
             Divider()
@@ -46,9 +51,12 @@ struct BestWorstSummaryCard: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(worstProduct?.productName ?? "N/A")
+                    Text(worstProduct.productName)
                         .lineLimit(1)
-                    Text("(\(worstProduct?.unitsSold ?? 0) sold)")
+                    HStack {
+                        Text("ID: \(worstProduct.productId)")
+                        Text("(\(worstProduct.unitsSold) sold)")
+                    }
                 }
             }
         }
@@ -56,16 +64,16 @@ struct BestWorstSummaryCard: View {
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
         // interactive on tap
-        .onTapGesture {
-            isShowingDetail = true
-        }
-        .sheet(isPresented: $isShowingDetail) {
-            ProductPerformanceDetailView(bestWorstItems: bestWorstProducts)
-        }
+//        .onTapGesture {
+//            isShowingDetail = true
+//        }
+//        .sheet(isPresented: $isShowingDetail) {
+//            ProductPerformanceDetailView(bestWorstItems: bestWorstProducts)
+//        }
     }
   
         
-    }
+}
 
 
 
