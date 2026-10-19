@@ -40,8 +40,11 @@ struct InventoryView: View {
                             Text(item.productName)
                                 .font(.headline)
                             Text("Location: \(item.locationName)")
+                            Text("Shelf: \(item.shelf)   Bin: \(item.bin)") // added for user story requirement - BB
+                                .font(.footnote) // style edit - BB
                             Text("Quantity: \(item.quantity)")
                             Text("Reorder Point: \(item.reorderPoint)")
+                                .font(.footnote) // style edit - BB
                             if item.isLowStock {
                                 Label(
                                     "Low Stock",
@@ -53,7 +56,7 @@ struct InventoryView: View {
                         .padding(.vertical, 4)
                         // NOTE: Combined list row elements so VoiceOver reads product details, quantities, and stock status cohesively as a single button/element
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(item.productName), Location: \(item.locationName), Quantity: \(item.quantity), Reorder Point: \(item.reorderPoint)\(item.isLowStock ? ", Low Stock Warning" : "")")
+                        .accessibilityLabel("\(item.productName), Location: \(item.locationName), Shelf: \(item.shelf), Bin: \(item.bin) Quantity: \(item.quantity), Reorder Point: \(item.reorderPoint)\(item.isLowStock ? ", Low Stock Warning" : "")") // added in Shelf and Bin - BB
                     }
                 }
             }
