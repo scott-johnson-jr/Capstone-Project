@@ -33,13 +33,19 @@ struct ContentView: View {
                         DashboardView()
                             .environment(\.dashboardRepository, repository)
                             .accessibilityIdentifier("dashboardView")
-
+//                  case "productCatalog":
+//                      ProductDetailView()
+//                          call to repo
+//                          .accessibilityIdentifier("productView")
+//                    case "logout":
+//                        Name()
+//                        .accessibilityIdentifier("logout")
+    
                     default:
                         WelcomeView()
                             .accessibilityIdentifier("welcomeView")
                     }
                 }
-                .navigationBarTitle("Dashboard", displayMode: .inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button(action: {
@@ -99,20 +105,6 @@ struct DrawerView: View {
                 .padding(.leading, 20)
             
             Button {
-                current = "welcome"
-                closeDrawer()
-            } label: {
-                Label("Welcome Screen", systemImage: "house")
-                    .foregroundColor(.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-            }
-            .accessibilityIdentifier("welcomeViewButton")
-            
-            Divider()
-            
-            Button {
                 current = "employees"
                 closeDrawer()
             } label: {
@@ -159,6 +151,36 @@ struct DrawerView: View {
                     .padding(.horizontal, 20)
             }
             .accessibilityIdentifier("dashboardViewButton")
+            
+            Button {
+                current = "productCatalog"
+                closeDrawer()
+            } label: {
+                Label("Product Catalog", systemImage: "book")
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+            }
+            .accessibilityIdentifier("productCatalogViewButton")
+            
+            
+            
+            Divider()
+            // needs to be log out
+            Button {
+                current = "logout"
+                closeDrawer()
+            } label: {
+                Label("Logout", systemImage: "rectangle.portrait.and.arrow.right")
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+            }
+            .accessibilityIdentifier("logoutButton")
+            
+            
             
             Spacer()
         }
