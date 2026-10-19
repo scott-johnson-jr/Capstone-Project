@@ -26,9 +26,9 @@ struct ProductDetailView: View {
         }
         .background(Color.catalogBackground)
         .navigationTitle(product.name)
-        .safeAreaInset(edge: .bottom) {
-            addButton
-        }
+//        .safeAreaInset(edge: .bottom) {
+//            addButton
+//        }
     }
 
     private var hero: some View {
@@ -129,28 +129,28 @@ struct ProductDetailView: View {
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private var addButton: some View {
-        Button {
-            added = true
-        } label: {
-            Text(added ? "Added to bag" : "Add to bag · \(product.price.currencyString)")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.primary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .foregroundStyle(Color.catalogBackground)
-        }
-        .buttonStyle(.plain)
-        .disabled(added)
-        .frame(minHeight: 44) // NOTE: Ensures minimum 44pt touch target height requirement for add to bag button
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
-        .background(.ultraThinMaterial)
-        // NOTE: Explicit accessibility labeling for add to bag action
-        .accessibilityLabel(added ? "Item added to bag" : "Add to bag, \(product.price.currencyString)")
-        .accessibilityAddTraits(.isButton)
-    }
+//    private var addButton: some View {
+//        Button {
+//            added = true
+//        } label: {
+//            Text(added ? "Added to bag" : "Add to bag · \(product.price.currencyString)")
+//                .font(.headline)
+//                .frame(maxWidth: .infinity)
+//                .padding(.vertical, 16)
+//                .background(Color.primary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+//                .foregroundStyle(Color.catalogBackground)
+//        }
+//        .buttonStyle(.plain)
+//        .disabled(added)
+//        .frame(minHeight: 44) // NOTE: Ensures minimum 44pt touch target height requirement for add to bag button
+//        .padding(.horizontal, 20)
+//        .padding(.top, 8)
+//        .padding(.bottom, 12)
+//        .background(.ultraThinMaterial)
+//        // NOTE: Explicit accessibility labeling for add to bag action
+//        .accessibilityLabel(added ? "Item added to bag" : "Add to bag, \(product.price.currencyString)")
+//        .accessibilityAddTraits(.isButton)
+//    }
 }
 
 struct ProductMark: View {
