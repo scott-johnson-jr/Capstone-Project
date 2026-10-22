@@ -26,7 +26,7 @@ final class InventoryViewModel: ObservableObject {
                 item.locationName.lowercased().contains(filter.lowercased())
             }.sorted { $0.productName < $1.productName }
         }
-    } // added in more code for filtering -BB
+    }
     
     @Published var isLoading = false
     @Published var errorMessage: String?
