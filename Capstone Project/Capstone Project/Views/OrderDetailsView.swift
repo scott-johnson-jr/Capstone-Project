@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OrderDetails: View {
     let order: Order
+    let product: OrderProduct?
     
     var body: some View {
         // NOTE: Wrapped in ScrollView to ensure adaptability across orientations and extreme Dynamic Type sizes without clipping
@@ -61,7 +62,16 @@ struct OrderDetails: View {
                             .font(Font.body.bold())
                             .accessibilityLabel("Item: \(order.productName)")
                         
-                        HStack {
+                        if let data = product?.thumbnailPhoto, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 180, height: 180)
+                            
+                            
+                    }
+                    
+                    HStack {
                             Text("Quantity")
                             Spacer()
                             Text("\(order.orderQty)")

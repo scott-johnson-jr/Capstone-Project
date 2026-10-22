@@ -9,13 +9,15 @@
 import SwiftUI
 
 struct EmployeeList: View {
-    
+        
     @Environment(\.employeeRepository) var employeeRepository
     @State var viewModel: ViewModel
     
     init(repository: any RepositoryProtocol<Employee>) {
         _viewModel = State(wrappedValue: ViewModel(repository: repository))
     }
+    
+    
     
     var body: some View {
         VStack {
@@ -26,6 +28,28 @@ struct EmployeeList: View {
                     .font(.title2.bold())
                     .frame(maxWidth: .infinity)
                     .accessibilityAddTraits(.isHeader) // NOTE: Identifies the title as a screen header for VoiceOver
+                ZStack {
+                    HStack {
+                        Text("Filter")
+                        TextField("Name/Dept/ID", text: $viewModel.filter)
+                        Menu {
+                            Picker("Sort by", selection: $viewModel.sortOption) {
+                                ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
+                                    Text(option.rawValue)
+                                        .tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .accessibilityLabel("Sort employees")
+                        }
+                    }
+                    
+                    .fixedSize(horizontal: true, vertical: false)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+
                 
                 HStack {
                     Text("Name")
@@ -34,6 +58,8 @@ struct EmployeeList: View {
                 }
                 .font(.subheadline.bold())
                 .foregroundStyle(.secondary)
+                
+                                
             }
             .padding(.horizontal, 32)
             .padding(.top, 8)
@@ -194,6 +220,14 @@ extension EmployeeList {
      @Observable
      class ViewModel: Failable {
         
+        enum SortOption: String, CaseIterable {
+            case name = "Name"
+            case department = "Department"
+            case employeeID = "Employee ID"
+        }
+        
+        var sortOption: SortOption = .department
+        
          private let repository: any RepositoryProtocol<Employee>
         
          init(repository: any RepositoryProtocol<Employee>) {
@@ -205,6 +239,69 @@ extension EmployeeList {
          var employees: [Employee] = [] {
              didSet {
                  selectedEmployee = nil
+                updateMatchingEmployees()
+            }
+        }
+        
+        var filter: String = "" {
+            didSet {
+                updateMatchingEmployees()
+            }
+        }
+        
+        var matchingEmployees: [Employee] = [] {
+            didSet {
+                if let selected = selectedEmployee,
+                   !matchingEmployees.contains(selected) {
+                    selectedEmployee = nil
+                }
+            }
+        }
+    
+        private func updateMatchingEmployees() {
+            matchingEmployees = employees.filter { employee in
+                filter.isEmpty ||
+                "\(employee.firstName) \(employee.lastName)"
+                    .lowercased()
+                    .contains(filter.lowercased()) ||
+                (employee.department ?? "")
+                    .lowercased()
+                    .contains(filter.lowercased()) ||
+                String(employee.employeeId)
+                    .contains(filter)
+            }
+        }
+        
+        var sortedEmployees: [Employee] {
+            matchingEmployees.sorted { first, second in
+                switch sortOption {
+                case .name:
+                    let firstName = "\(first.firstName) \(first.lastName)"
+                    let secondName = "\(second.firstName) \(second.lastName)"
+                    
+                    let comparison = firstName.localizedCaseInsensitiveCompare(secondName)
+                    
+                    if comparison == .orderedSame {
+                        return first.employeeId < second.employeeId
+                    }
+                    
+                    return comparison == .orderedAscending
+                    
+                case .department:
+                    let firstDepartment = first.department ?? ""
+                    let secondDepartment = second.department ?? ""
+                    
+                    let comparison = firstDepartment.localizedCaseInsensitiveCompare(secondDepartment)
+                    
+                    if comparison == .orderedSame {
+                        return first.employeeId < second.employeeId
+                    }
+                    
+                    return comparison == .orderedAscending
+                    
+                case .employeeID:
+                    return first.employeeId < second.employeeId
+                }
              }
          }
         

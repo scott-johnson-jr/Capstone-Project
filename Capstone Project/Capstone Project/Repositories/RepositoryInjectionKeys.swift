@@ -22,12 +22,16 @@ struct OrderRepositoryKey: EnvironmentKey {
     static let defaultValue: any RepositoryProtocol<Order> =
     RemoteOrderRepositoryDirectory(urlBase: "https://api.bootcampcentral.com/api")
 }
-    
-
-
 
 struct DashboardRepositoryKey: EnvironmentKey {
     static let defaultValue: any DashboardRepositoryProtocol = RemoteDashboardRepository(
         apiClient: APIClient()
     )
 }
+
+struct OrderProductRepositoryKey: EnvironmentKey {
+    static let defaultValue: any RepositoryProtocol<OrderProduct> =
+    RemoteOrderProductRepository(urlBase: "https://api.bootcampcentral.com/api")
+}
+
+
