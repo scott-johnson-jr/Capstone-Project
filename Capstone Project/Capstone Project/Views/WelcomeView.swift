@@ -15,8 +15,11 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            Color.blue.opacity(0.5)
+            
+            MovingGradientBackground()
                 .ignoresSafeArea()
+            
+            
             VStack{
                 Image(systemName: "sun.max.circle")
                     .foregroundColor(.yellow)
@@ -31,6 +34,26 @@ struct WelcomeView: View {
                     .padding(40)
             }
         }
+    }
+    
+}
+
+struct MovingGradientBackground: View {
+    @State private var animate = false
+
+    
+    var body: some View {
+        LinearGradient(
+            colors: [.yellow, .green, .blue],
+            startPoint: animate ? .topTrailing : .topLeading,
+            endPoint: animate ? .bottomLeading : .bottomTrailing)
+            .blur(radius: 50)
+            .ignoresSafeArea()
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                    animate.toggle()
+                }
+            }
     }
     
 }

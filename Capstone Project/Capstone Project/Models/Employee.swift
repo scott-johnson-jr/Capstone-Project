@@ -18,6 +18,10 @@ class Employee: Identifiable, Hashable, Codable {
     let hireDate: Date?
     let jobTitle: String
     
+    var id: Int {
+        employeeId
+    }
+    
     init (
         employeeId: Int,
         firstName: String,
