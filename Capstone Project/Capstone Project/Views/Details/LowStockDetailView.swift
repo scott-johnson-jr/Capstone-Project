@@ -15,12 +15,19 @@ struct LowStockDetailView: View {
         NavigationStack {
             List(lowStockItems, id: \.productId) { item in
                 VStack(alignment: .leading, spacing: 4) {
+                // Product Name
                     Text(item.productName)
                         .font(.headline)
-                    HStack{
-                        Text("Stock: \(item.stockLevel)")
-                            .foregroundStyle(.red)
-                            .bold()
+                    
+                    HStack(alignment: .center){
+                        // Pair red color with a warning symbol for Color Independence
+                        HStack(spacing: 4){
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.subheadline) // scales natively with text
+                            Text("Stock: \(item.stockLevel)")
+                                .bold()
+                        }
+                        .foregroundColor(.red) // clearly conveys status alongside the symbol
                         
                         Spacer()
                         
@@ -30,13 +37,27 @@ struct LowStockDetailView: View {
                     .font(.subheadline)
                 }
                 .padding(.vertical, 4)
+                // adding combine elements into ssingle clean Voivrover readout
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("\(item.productName). Low stock status: \(item.stockLevel) available. Reorder point is \(item.reorderPoint).")
             }
             .navigationTitle("Low Stock Inventory")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true) // hiding back button that auto shows from nav stack
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done"){
+                    Button(action: {
                         dismiss()
+                    }) {
+                        Text("Done")
+                            .bold()
+                            .padding(.horizontal, 12)
+                            .padding(.vertical,8)
+                        // gurantees a physical 44x44 minimum touch targest area
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
+                        
+                        
                     }
                 }
             }
