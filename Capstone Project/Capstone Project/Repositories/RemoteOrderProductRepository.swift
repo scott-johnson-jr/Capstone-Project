@@ -6,18 +6,36 @@
 //
 
 import Foundation
+internal import CoreData
 // remote repository for the images in the orderdetails app
 class RemoteOrderProductRepository: RepositoryProtocol {
 
     private let urlBase: String
+    private let context: NSManagedObjectContext
 
-    init(urlBase: String) {
+    init(urlBase: String,
+         context: NSManagedObjectContext =
+    PersistenceController.shared.container.viewContext) {
         self.urlBase = urlBase
+        self.context = context
     }
 
     func getAll() async throws -> [OrderProduct] {
-        let urlString = "\(urlBase)/Product"
-        return try await fetchAll(urlString)
+        do {
+            let data = try await fetchData("\(urlBase)/Product")
+            let orderProducts = try JSONDecoder().decode([OrderProduct].self, from: data)
+            
+            try await saveOrderProducts(orderProducts)
+            
+            return orderProducts
+        } catch {
+            let savedOrderProducts = try await fetchCachedOrderProducts()
+            
+            if !savedOrderProducts.isEmpty {
+                return savedOrderProducts
+            }
+            throw error
+        }
     }
 
     func getById(_ orderProductId: OrderProduct.ID) async throws -> OrderProduct? {
@@ -48,6 +66,53 @@ class RemoteOrderProductRepository: RepositoryProtocol {
             throw URLError(.badServerResponse)
         }
         return data
+    }
+    
+    private func saveOrderProducts(_ orderProducts: [OrderProduct]) async throws {
+        try await context.perform {
+            for orderProduct in orderProducts {
+                let request = OrderProductEntity.fetchRequest()
+                request.predicate = NSPredicate(
+                    format: "productId == %@",
+                    NSNumber(value: orderProduct.productId)
+                )
+
+                let entity = try self.context.fetch(request).first
+                    ?? OrderProductEntity(context: self.context)
+
+                entity.productId = Int64(orderProduct.productId)
+                entity.name = orderProduct.name
+                entity.thumbnailPhoto = orderProduct.thumbnailPhoto
+                entity.thumbnailPhotoFileName = orderProduct.thumbnailPhotoFileName
+                entity.lastUpdated = Date()
+            }
+
+            if self.context.hasChanges {
+                try self.context.save()
+            }
+        }
+    }
+
+    private func fetchCachedOrderProducts() async throws -> [OrderProduct] {
+        try await context.perform {
+            let request = OrderProductEntity.fetchRequest()
+            request.sortDescriptors = [
+                NSSortDescriptor(key: "name", ascending: true)
+            ]
+
+            return try self.context.fetch(request).compactMap { entity in
+                guard let name = entity.name else {
+                    return nil
+                }
+
+                return OrderProduct(
+                    productId: Int(entity.productId),
+                    name: name,
+                    thumbnailPhoto: entity.thumbnailPhoto,
+                    thumbnailPhotoFileName: entity.thumbnailPhotoFileName
+                )
+            }
+        }
     }
     
 }
