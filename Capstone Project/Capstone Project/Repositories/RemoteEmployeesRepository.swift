@@ -1,20 +1,11 @@
-//
-//  RemoteEmployeeDirectoryRepository.swift
-//  Capstone Project
-//
-
 import Foundation
 internal import CoreData
 
 class RemoteEmployeeDirectoryRepository: RepositoryProtocol {
-
     private let urlBase: String
     private let context: NSManagedObjectContext
 
-    private let memoryCache = NSCache<NSString, CacheBox>()
-    private let cacheKey = "employees"
     private let maxAge: TimeInterval = 15 * 60
-
     private var cachedEmployees: [Employee]?
     private var cacheTimestamp: Date?
 
@@ -27,47 +18,37 @@ class RemoteEmployeeDirectoryRepository: RepositoryProtocol {
         self.context = context
     }
 
+
     func getAll() async throws -> [Employee] {
-        // 1. Check the in-memory cache.
         if let employees = cachedEmployees,
            let timestamp = cacheTimestamp,
            Date().timeIntervalSince(timestamp) <= maxAge {
             return employees
         }
 
-        // 2. Try the API.
         do {
             let data = try await fetchData("\(urlBase)/Employee")
             let employees = try decoder.decode([Employee].self, from: data)
-
-            // Save the fresh response to Core Data.
             try await saveEmployees(employees)
-
-            // Update the in-memory cache.
             cachedEmployees = employees
             cacheTimestamp = Date()
-
             return employees
         } catch {
-            // 3. Fall back to saved employees.
-            let savedEmployees = try await fetchCachedEmployees()
-
-            if !savedEmployees.isEmpty {
-                cachedEmployees = savedEmployees
+            let saved = try await fetchCachedEmployees()
+            if !saved.isEmpty {
+                cachedEmployees = saved
                 cacheTimestamp = Date()
-                return savedEmployees
+                return saved
             }
-
-            // Nothing is cached, so report the original API error.
             throw error
         }
     }
 
     func getById(_ employeeId: Employee.ID) async throws -> Employee? {
-        let employees = try await getAll()
-        return employees.first { $0.employeeId == employeeId }
+        let data = try await fetchData("\(urlBase)/Employee/\(employeeId)")
+        return try decoder.decode(Employee.self, from: data)
     }
-
+    
     private func fetchData(_ urlString: String) async throws -> Data {
         guard let url = URL(string: urlString) else {
             throw URLError(.badURL)
@@ -82,6 +63,7 @@ class RemoteEmployeeDirectoryRepository: RepositoryProtocol {
 
         return data
     }
+
 
     private func saveEmployees(_ employees: [Employee]) async throws {
         try await context.perform {
@@ -141,14 +123,93 @@ class RemoteEmployeeDirectoryRepository: RepositoryProtocol {
         }
     }
 
-    private var decoder: JSONDecoder {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+    func updateEmployee(
+        employeeId: Int,
+        firstName: String,
+        lastName: String,
+        title: String,
+        employeeNumber: String,
+        departmentId: Int,
+        shiftId: Int,
+        startDate: Date,
+        endDate: Date?
+    ) async throws {
+        let urlString = "\(urlBase)/Employee/\(employeeId)"
 
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds
+        ]
+
+        let body: [String: Any] = [
+            "firstName": firstName,
+            "lastName": lastName,
+            "title": title,
+            "employeeNumber": employeeNumber,
+            "departmentId": departmentId,
+            "shiftId": shiftId,
+            "startDate": dateFormatter.string(from: startDate),
+            "endDate": endDate.map { dateFormatter.string(from: $0) } ?? NSNull()
+        ]
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+
+        cachedEmployees = nil
+        cacheTimestamp = nil
+    }
+    private static let zonedFractional: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    private static let zoned: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    private static let noZoneFormatters: [DateFormatter] =
+        ["yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss"].map { format in
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = format
+            return f
+        }
+
+    private var decoder: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(formatter)
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+
+            if let d = Self.zonedFractional.date(from: string) { return d }
+            if let d = Self.zoned.date(from: string) { return d }
+            for formatter in Self.noZoneFormatters {
+                if let d = formatter.date(from: string) { return d }
+            }
+
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid date: \(string)"
+            )
+        }
         return decoder
     }
 }

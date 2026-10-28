@@ -59,9 +59,16 @@ final class APIClient {
         return try await get("/api/Dashboard/low-stock", responseType: [LowStock].self)
     }
 
-    func fetchShifts() async throws -> [Shifts] {
-        return try await get("/api/Dashboard/shifts", responseType: [Shifts].self)
+    func fetchDepartments() async throws -> [Department] {
+        try await get("/api/Department", responseType: [Department].self)
     }
+
+    func fetchShiftOptions() async throws -> [ShiftOption] {
+        try await get("/api/shift", responseType: [ShiftOption].self)
+    }
+    func fetchShifts() async throws -> [Shifts] {
+            return try await get("/api/Dashboard/shifts", responseType: [Shifts].self)
+        }
     
 }
 enum APIError: Error {

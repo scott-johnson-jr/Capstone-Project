@@ -29,4 +29,5 @@ final class RemoteDashboardRepository: DashboardRepositoryProtocol {
     func getShifts() async throws -> [Shifts] {
         try await apiClient.fetchShifts()
     }
+    
 }
