@@ -1,0 +1,145 @@
+import SwiftUI
+
+struct EmployeeEditView: View {
+    let employee: Employee
+    let repository: RemoteEmployeeDirectoryRepository
+    let departments: [Department]
+    let shifts: [ShiftOption]
+    let onSaved: () async -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var title = ""
+    @State private var employeeNumber = ""
+    @State private var departmentId = 0
+    @State private var shiftId = 0
+    @State private var startDate = Date()
+    @State private var endDate = Date()
+
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        Form {
+            Section("Employee") {
+                LabeledContent(
+                    "Name",
+                    value: "\(employee.firstName) \(employee.lastName)"
+                )
+
+                LabeledContent(
+                    "Employee ID",
+                    value: "\(employee.employeeId)"
+                )
+
+                TextField("Employee Number", text: $employeeNumber)
+                TextField("Title", text: $title)
+            }
+
+            Section("Department and Shift") {
+                Picker("Department", selection: $departmentId) {
+                    ForEach(departments) { department in
+                        Text(department.name)
+                            .tag(department.departmentId)
+                    }
+                }
+
+                Picker("Shift", selection: $shiftId) {
+                    ForEach(shifts) { shift in
+                        Text(shift.name)
+                            .tag(shift.shiftId)
+                    }
+                }
+            }
+
+            Section("Shift Dates") {
+                DatePicker(
+                    "Start Date",
+                    selection: $startDate,
+                    displayedComponents: .date
+                )
+
+                DatePicker(
+                    "End Date",
+                    selection: $endDate,
+                    displayedComponents: .date
+                )
+            }
+
+            if let errorMessage {
+                Section {
+                    Text(errorMessage)
+                        .foregroundStyle(.red)
+                }
+            }
+
+            Section {
+                Button {
+                    Task {
+                        await saveEmployee()
+                    }
+                } label: {
+                    if isSaving {
+                        ProgressView("Saving...")
+                    } else {
+                        Text("Save Changes")
+                    }
+                }
+                .disabled(
+                    isSaving ||
+                    employeeNumber.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty ||
+                    title.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty ||
+                    departmentId == 0 ||
+                    shiftId == 0 ||
+                    endDate < startDate
+                )
+            }
+        }
+        .navigationTitle("Edit Employee")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            title = employee.title ?? ""
+            employeeNumber = employee.employeeNumber ?? ""
+
+            if let history = employee.shiftHistory?.first {
+                departmentId = history.departmentId
+                shiftId = history.shiftId
+                startDate = history.startDate
+                endDate = history.endDate
+            }
+        }
+    }
+
+    private func saveEmployee() async {
+        isSaving = true
+        errorMessage = nil
+
+        do {
+            try await repository.updateEmployee(
+                employeeId: employee.employeeId,
+                title: title.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ),
+                employeeNumber: employeeNumber.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ),
+                departmentId: departmentId,
+                shiftId: shiftId,
+                startDate: startDate,
+                endDate: endDate
+            )
+
+            await onSaved()
+            dismiss()
+        } catch {
+            errorMessage =
+                "Could not save employee changes: \(error.localizedDescription)"
+        }
+
+        isSaving = false
+    }
+}
