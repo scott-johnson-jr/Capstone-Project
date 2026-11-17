@@ -34,4 +34,9 @@ struct OrderProductRepositoryKey: EnvironmentKey {
     RemoteOrderProductRepository(urlBase: "https://api.bootcampcentral.com/api")
 }
 
+struct ProductRepositoryKey: EnvironmentKey {
+    static let defaultValue: any RepositoryProtocol<Product> =
+        RemoteProductRepository(urlBase: "https://api.bootcampcentral.com/api")
+}
+
 

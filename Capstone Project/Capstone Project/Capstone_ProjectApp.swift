@@ -17,6 +17,7 @@ struct Capstone_ProjectApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authStatus)
         }
     }
 }

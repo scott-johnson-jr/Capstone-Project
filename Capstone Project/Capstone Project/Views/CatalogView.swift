@@ -1,47 +1,40 @@
 import SwiftUI
 
 struct CatalogView: View {
+    @Environment(\.productRepository) private var repository
+    @State private var viewModel = CatalogViewModel()
     @State private var query = ""
-    @State private var category: Product.Category = .all
 
     private var products: [Product] {
-        Catalog.products.filter { product in
-            let matchesCategory = category == .all || product.category == category
-            let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
-            let matchesQuery = text.isEmpty
-                || product.name.localizedCaseInsensitiveContains(text)
-                || product.brand.localizedCaseInsensitiveContains(text)
-            return matchesCategory && matchesQuery
+        guard case .loaded(let all) = viewModel.state else { return [] }
+        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return all }
+        return all.filter {
+            $0.name.localizedCaseInsensitiveContains(text)
+                || $0.productNumber.localizedCaseInsensitiveContains(text)
         }
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    header
-                    categoryPicker
-                    if products.isEmpty {
-                        ContentUnavailableView.search(text: query)
-                            .padding(.top, 40)
-                    } else {
-                        LazyVGrid(
-                            columns: [
-                                GridItem(.flexible(), spacing: 14),
-                                GridItem(.flexible(), spacing: 14)
-                            ],
-                            spacing: 14
-                        ) {
-                            ForEach(products) { product in
-                                NavigationLink(value: product) {
-                                    ProductCard(product: product)
-                                }
-                                .buttonStyle(.plain)
-                            }
+            Group {
+                switch viewModel.state {
+                case .loading:
+                    ProgressView("Loading catalog…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                case .failed(let message):
+                    ContentUnavailableView {
+                        Label("Couldn't load catalog", systemImage: "wifi.exclamationmark")
+                    } description: {
+                        Text(message)
+                    } actions: {
+                        Button("Try again") {
+                            Task { await viewModel.load(using: repository) }
                         }
                     }
+                case .loaded:
+                    catalogContent
                 }
-                .padding(20)
             }
             .background(Color.catalogBackground)
             .navigationTitle("Catalog")
@@ -49,9 +42,38 @@ struct CatalogView: View {
                 ProductDetailView(product: product)
             }
             .searchable(text: $query, prompt: "Search products")
+            .task { await viewModel.load(using: repository) }
         }
     }
 
+    private var catalogContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                header
+                if products.isEmpty {
+                    ContentUnavailableView.search(text: query)
+                        .padding(.top, 40)
+                } else {
+                    LazyVGrid(
+                        columns: [
+                            GridItem(.flexible(), spacing: 14),
+                            GridItem(.flexible(), spacing: 14)
+                        ],
+                        spacing: 14
+                    ) {
+                        ForEach(products) { product in
+                            NavigationLink(value: product) {
+                                ProductCard(product: product)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .refreshable { await viewModel.load(using: repository) }
+    }
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("In stock")
@@ -60,35 +82,12 @@ struct CatalogView: View {
             Text("\(products.count) pieces")
                 .font(.title2.weight(.semibold))
         }
-        .accessibilityElement(children: .combine)
     }
 
-    private var categoryPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Product.Category.allCases) { item in
-                    Button {
-                        category = item
-                    } label: {
-                        Text(item.rawValue)
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .frame(minWidth: 44, minHeight: 44) // meets the minimum 44x44
-                            .background(
-                                category == item ? Color.primary : Color.cardBackground,
-                                in: Capsule()
-                            )
-                            .foregroundStyle(category == item ? Color.catalogBackground : .primary)
-                    }
-                    .buttonStyle(.plain)
-                    // announces to voiceover which item is selection state is active
-                    .accessibilityValue(category == item ? "Selected" : "")
-                    .accessibilityAddTraits(category == item ? .isSelected : [] )
-                }
-            }
-        }
-    }
+}
+
+#Preview {
+    CatalogView()
 }
 
 struct ProductCard: View {
@@ -99,21 +98,20 @@ struct ProductCard: View {
             ProductMark(product: product, size: 54)
                 .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .leading, spacing: 2) {
-                Text(product.brand.uppercased())
+                Text(product.productNumber.uppercased())
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(product.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                    .lineLimit(2) // safely allows 2 lines of text if Dynamic Type sizes expand layout
+                    .lineLimit(1)
             }
-            Text(product.price.currencyString)
+            Text(product.listPrice.currencyString)
                 .font(.subheadline.weight(.semibold))
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .accessibilityElement(children: .combine) // marges layout info into single structural readout
     }
 }
 

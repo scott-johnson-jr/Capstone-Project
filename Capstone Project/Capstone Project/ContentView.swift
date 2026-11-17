@@ -4,18 +4,19 @@ struct ContentView: View {
     @Environment(\.employeeRepository) private var employeeRepository
     @Environment(\.inventoryRepository) private var inventoryRepository
     @Environment(\.orderRepository) private var orderRepository
+    @EnvironmentObject private var authStatus: AuthStatus
     
-//    @State private var isLoggedIn = false
+    @State private var isLoggedIn = false
     @State private var current: String = "welcome"
     @State private var showDrawer: Bool = false
     
     private let repository = RemoteDashboardRepository(apiClient: APIClient())
     
     var body: some View {
-//        if isLoggedIn {
+        if authStatus.isLoggedIn {
         NavigationStack {
             ZStack {
-                // Main content switcher
+//                 Main content switcher
                 VStack {
                     switch current {
                     case "employees":
@@ -38,9 +39,6 @@ struct ContentView: View {
                   case "productCatalog":
                       CatalogView()
                           .accessibilityIdentifier("productView")
-//                    case "logout":
-//                        Name()
-//                        .accessibilityIdentifier("logout")
     
                     default:
                         WelcomeView()
@@ -77,7 +75,7 @@ struct ContentView: View {
                 // Slide-out Drawer View
                 HStack(spacing: 0) {
                     DrawerView(current: $current, showDrawer: $showDrawer
-//                               , isLoggedIn: $isLoggedIn
+                               , isLoggedIn: $isLoggedIn
                     )
                         .frame(width: 250)
                         .offset(x: showDrawer ? 0 : -250)
@@ -89,17 +87,18 @@ struct ContentView: View {
         )
         .animation(.easeInOut, value: showDrawer)
     }
-//        else {
-//        LoginView()
-//            .accessibilityIdentifier("loginView")
-//    }
+        else {
+        LoginView()
+            .accessibilityIdentifier("loginView")
+    }
 }
 
 // Dedicated Drawer View preserving your accessibility identifiers
     struct DrawerView: View {
         @Binding var current: String
         @Binding var showDrawer: Bool
-//        @Binding var isLoggedIn: Bool
+        @EnvironmentObject private var authStatus: AuthStatus
+        @Binding var isLoggedIn: Bool
         
         var body: some View {
             VStack(alignment: .leading, spacing: 0) {
@@ -177,8 +176,8 @@ struct ContentView: View {
                 Divider()
                 // needs to be log out
                 Button {
-//                    isLoggedIn = false
-                    current = "logout"
+                    authStatus.updateLoginStatus(success: false, authToken: nil, refreshToken: nil)
+                    current = "welcome"
                     closeDrawer()
                 } label: {
                     Label("Logout", systemImage: "rectangle.portrait.and.arrow.right")
@@ -204,7 +203,7 @@ struct ContentView: View {
             }
         }
     }
-//}
+}
 
 #Preview {
     ContentView()
