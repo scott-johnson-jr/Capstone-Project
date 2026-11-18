@@ -1,9 +1,3 @@
-//
-//  InventoryViewModel.swift
-//  Capstone Project
-//
-//  Created by user301577 on 10/1/26.
-//
 
 import Foundation
 import Combine
@@ -11,13 +5,11 @@ import Combine
 @MainActor
 final class InventoryViewModel: ObservableObject {
     @Published var inventory: [InventoryItem] = [] {
-        didSet {
-            filter = ""
-        }
+        didSet { filter = "" }
     }
-    
+
     @Published var matchingInventory: [InventoryItem] = []
-    
+
     @Published var filter: String = "" {
         didSet {
             matchingInventory = inventory.filter { item in
@@ -27,25 +19,40 @@ final class InventoryViewModel: ObservableObject {
             }.sorted { $0.productName < $1.productName }
         }
     }
-    
+
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
+    @Published var isShowingCachedData = false
+
     private let repository: InventoryRepositoryProtocol
-    
+
     init(repository: InventoryRepositoryProtocol) {
         self.repository = repository
     }
-    
+
     func loadInventory() async {
+        guard !isLoading else { return }
+
         isLoading = true
         errorMessage = nil
-        do {
-            inventory = try await repository.fetchInventory()
-            matchingInventory = inventory // Populates list initially on load - BB
-        } catch {
-            errorMessage = error.localizedDescription
+
+        defer {
+            isLoading = false
         }
-        isLoading = false
+
+        do {
+            let result = try await repository.fetchInventory()
+
+            inventory = result.items
+            matchingInventory = result.items
+            isShowingCachedData = result.isFromCache
+
+            if result.isFromCache {
+                errorMessage = "You're offline. Showing saved inventory. Pull to refresh or try again when connected."
+            }
+        } catch {
+            errorMessage = "Unable to load inventory. Please check your connection and try again."
+        }
     }
 }
+
