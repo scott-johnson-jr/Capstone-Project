@@ -1,0 +1,39 @@
+AdventureWorks/
+│
+├── App/
+│   ├── AdventureWorksApp.swift
+│   └── AppState.swift
+│
+├── Core/
+│   ├── Networking/
+│   │   ├── APIClient.swift
+│   │   ├── APIEndpoint.swift
+│   │   ├── APIError.swift
+│   │   └── AuthInterceptor.swift
+│   │
+│   ├── Storage/
+│   │   ├── TokenStore.swift
+│   │   └── KeychainTokenStore.swift
+│   │
+│   └── Models/
+│
+├── Features/
+│   ├── Authentication/
+│   │   ├── LoginView.swift
+│   │   ├── LoginViewModel.swift
+│   │   └── AuthRepository.swift
+│   │
+│   ├── Dashboard/
+│   │   ├── DashboardView.swift
+│   │   ├── DashboardViewModel.swift
+│   │   └── DashboardRepository.swift
+│   │
+│   ├── Employees/
+│   ├── Products/
+│   ├── Inventory/
+│   └── Orders/
+│
+└── Tests/
+    ├── Mocks/
+    ├── ViewModelTests/
+    └── RepositoryTests/
