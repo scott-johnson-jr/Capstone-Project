@@ -225,6 +225,7 @@ struct ProductDetailView: View {
         do {
             try await browsingHistoryRepository.recordViewed(product)
         } catch {
+            print("recordProductView failed:", error, (error as NSError).userInfo)
             saveError = "Unable to save this product to browsing history."
         }
     }
@@ -235,6 +236,7 @@ struct ProductDetailView: View {
                 productId: product.productId
             )
         } catch {
+            print("loadSavedStatus failed:", error, (error as NSError).userInfo)
             saveError = "Unable to check whether this product is saved."
         }
     }
@@ -255,6 +257,7 @@ struct ProductDetailView: View {
 
             isSaved = newSavedStatus
         } catch {
+            print("toggleSaved failed:", error, (error as NSError).userInfo)
             saveError = "Unable to update your saved products. Please try again."
         }
     }
