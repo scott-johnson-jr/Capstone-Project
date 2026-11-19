@@ -1,9 +1,3 @@
-//
-//  CatalogViewModel.swift
-//  Capstone Project
-//
-//  Created by user301577 on 11/16/26.
-//
 
 import Foundation
 import Observation
@@ -11,6 +5,7 @@ import Observation
 @MainActor
 @Observable
 final class CatalogViewModel {
+
     enum State {
         case loading
         case loaded([Product])
@@ -18,13 +13,45 @@ final class CatalogViewModel {
     }
 
     private(set) var state: State = .loading
+    private(set) var isRefreshing = false
+    private(set) var errorMessage: String?
 
     func load(using repository: any RepositoryProtocol<Product>) async {
-        if case .failed = state { state = .loading }
+        guard !isRefreshing else { return }
+
+        let existingProducts: [Product]?
+
+        if case .loaded(let products) = state {
+            existingProducts = products
+        } else {
+            existingProducts = nil
+        }
+
+        isRefreshing = true
+        errorMessage = nil
+
+        if existingProducts == nil {
+            state = .loading
+        }
+
+        defer {
+            isRefreshing = false
+        }
+
         do {
-            state = .loaded(try await repository.getAll())
+            let products = try await repository.getAll()
+            state = .loaded(products)
+            errorMessage = nil
         } catch {
-            state = .failed(error.localizedDescription)
+            if let existingProducts {
+                state = .loaded(existingProducts)
+                errorMessage = "Unable to refresh products. Showing previously loaded products. Please try again."
+            } else {
+                state = .failed(
+                    "Unable to load products. Please check your connection and try again."
+                )
+            }
         }
     }
 }
+

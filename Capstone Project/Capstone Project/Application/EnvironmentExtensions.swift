@@ -37,6 +37,16 @@ extension EnvironmentValues {
         set { self[ProductRepositoryKey.self] = newValue }
     }
     
+    
+    var savedProductsRepository: SavedProductsRepository {
+        get { self[SavedProductsRepositoryKey.self] }
+        set { self[SavedProductsRepositoryKey.self] = newValue }
+    }
+
+    var browsingHistoryRepository: BrowsingHistoryRepository {
+        get { self[BrowsingHistoryRepositoryKey.self] }
+        set { self[BrowsingHistoryRepositoryKey.self] = newValue }
+    }
 }
 
 

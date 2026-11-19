@@ -1,8 +1,9 @@
+
 import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject private var authStatus: AuthStatus
-    
+
     @State private var loginId = ""
     @State private var password = ""
     @State private var isLoading = false
@@ -16,28 +17,45 @@ struct LoginView: View {
                         .textContentType(.username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .accessibilityLabel("Login ID")
+
                     SecureField("Password", text: $password)
                         .textContentType(.password)
+                        .accessibilityLabel("Password")
                 }
 
                 if let errorMessage {
                     Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
+                        Label {
+                            Text(errorMessage)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle")
+                        }
+                        .foregroundStyle(.red)
+                        .accessibilityAddTraits(.updatesFrequently)
                     }
                 }
 
                 Section {
                     Button(action: login) {
-                        if isLoading {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                        } else {
-                            Text("Log In")
-                                .frame(maxWidth: .infinity)
+                        HStack {
+                            Spacer()
+
+                            if isLoading {
+                                ProgressView("Logging in...")
+                            } else {
+                                Text("Log In")
+                            }
+
+                            Spacer()
                         }
                     }
-                    .disabled(loginId.isEmpty || password.isEmpty || isLoading)
+                    .disabled(
+                        loginId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        password.isEmpty ||
+                        isLoading
+                    )
+                    .accessibilityHint("Signs in using your login ID and password")
                 }
             }
             .navigationTitle("Log In")
@@ -45,25 +63,52 @@ struct LoginView: View {
         }
     }
 
+    @MainActor
     private func login() {
+        guard !isLoading else { return }
+
         isLoading = true
         errorMessage = nil
 
         Task {
+            defer {
+                isLoading = false
+            }
+
             do {
-                let result = try await AuthManager.shared.login(loginId: loginId, password: password)
+                let result = try await AuthManager.shared.login(
+                    loginId: loginId,
+                    password: password
+                )
+
                 authStatus.updateLoginStatus(
                     success: true,
                     authToken: result.accessToken,
-                    refreshToken: result.refreshToken)
+                    refreshToken: result.refreshToken
+                )
+            } catch let error as URLError {
+                switch error.code {
+                case .notConnectedToInternet, .networkConnectionLost:
+                    errorMessage = "No internet connection. Check your connection and try again."
+
+                case .timedOut:
+                    errorMessage = "The login request timed out. Please try again."
+
+                case .cannotFindHost, .cannotConnectToHost:
+                    errorMessage = "Unable to reach the server. Please try again later."
+
+                default:
+                    errorMessage = "A connection error occurred. Please try again."
+                }
             } catch {
                 errorMessage = error.localizedDescription
             }
-            isLoading = false
         }
     }
 }
 
 #Preview {
-    LoginView().environmentObject(AuthStatus())
+    LoginView()
+        .environmentObject(AuthStatus())
 }
+

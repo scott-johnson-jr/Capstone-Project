@@ -1,59 +1,75 @@
-//
-//  InventoryRepository.swift
-//  Capstone Project
-//
-//  Created by user301577 on 10/1/26.
-//
 
 import Foundation
 internal import CoreData
 
-protocol InventoryRepositoryProtocol {
-    func fetchInventory() async throws -> [InventoryItem]
+struct InventoryFetchResult {
+    let items: [InventoryItem]
+    let isFromCache: Bool
 }
+
+protocol InventoryRepositoryProtocol {
+    func fetchInventory() async throws -> InventoryFetchResult
+}
+
 final class InventoryRepository: InventoryRepositoryProtocol {
     private let apiClient: APIClient
     private let context: NSManagedObjectContext
-    init(apiClient: APIClient,
-         context: NSManagedObjectContext = PersistenceController.shared.container.viewContext) {
+
+    init(
+        apiClient: APIClient,
+        context: NSManagedObjectContext = PersistenceController.shared.container.viewContext
+    ) {
         self.apiClient = apiClient
         self.context = context
     }
-    func fetchInventory() async throws -> [InventoryItem] {
+
+    func fetchInventory() async throws -> InventoryFetchResult {
         do {
             let inventory = try await apiClient.get(
                 "/api/inventory",
                 responseType: [InventoryItem].self
             )
-            
+
             try await saveInventory(inventory)
-            
-            return inventory
+
+            return InventoryFetchResult(
+                items: inventory,
+                isFromCache: false
+            )
         } catch {
-            let savedInventory = try await fetchCachedInventory()
-            
-            if !savedInventory.isEmpty {
-                return savedInventory
+            let networkError = error
+
+            do {
+                let savedInventory = try await fetchCachedInventory()
+
+                if !savedInventory.isEmpty {
+                    return InventoryFetchResult(
+                        items: savedInventory,
+                        isFromCache: true
+                    )
+                }
+            } catch {
+                // Keep the original API error if reading the cache also fails.
             }
-            throw error
+
+            throw networkError
         }
     }
-    
+
     private func saveInventory(
         _ inventory: [InventoryItem]
     ) async throws {
         try await context.perform {
             for item in inventory {
                 let request = InventoryEntity.fetchRequest()
-                
                 request.predicate = NSPredicate(
                     format: "id == %@",
                     item.id
                 )
-                
+
                 let entity = try self.context.fetch(request).first
-                ?? InventoryEntity(context: self.context)
-                
+                    ?? InventoryEntity(context: self.context)
+
                 entity.id = item.id
                 entity.productId = Int64(item.productId)
                 entity.productName = item.productName
@@ -67,47 +83,45 @@ final class InventoryRepository: InventoryRepositoryProtocol {
                 entity.quantity = Int64(item.quantity)
                 entity.lastUpdated = Date()
             }
-            
+
             if self.context.hasChanges {
                 try self.context.save()
             }
-            
         }
     }
-    
+
     private func fetchCachedInventory() async throws -> [InventoryItem] {
         try await context.perform {
             let request = InventoryEntity.fetchRequest()
-            
             request.sortDescriptors = [
                 NSSortDescriptor(key: "productName", ascending: true),
                 NSSortDescriptor(key: "locationName", ascending: true)
             ]
-            
+
             return try self.context.fetch(request).compactMap { entity in
-            
-                guard let productName = entity.productName,
-                      let productNumber = entity.productNumber,
-                      let locationName = entity.locationName,
-                      let shelf = entity.shelf else {
+                guard
+                    let productName = entity.productName,
+                    let productNumber = entity.productNumber,
+                    let locationName = entity.locationName,
+                    let shelf = entity.shelf
+                else {
                     return nil
                 }
-                
+
                 return InventoryItem(
-                                productId: Int(entity.productId),
-                                productName: productName,
-                                productNumber: productNumber,
-                                safetyStockLevel: Int(entity.safetyStockLevel),
-                                reorderPoint: Int(entity.reorderPoint),
-                                locationId: Int(entity.locationId),
-                                locationName: locationName,
-                                shelf: shelf,
-                                bin: Int(entity.bin),
-                                quantity: Int(entity.quantity)
-                            )
-                
+                    productId: Int(entity.productId),
+                    productName: productName,
+                    productNumber: productNumber,
+                    safetyStockLevel: Int(entity.safetyStockLevel),
+                    reorderPoint: Int(entity.reorderPoint),
+                    locationId: Int(entity.locationId),
+                    locationName: locationName,
+                    shelf: shelf,
+                    bin: Int(entity.bin),
+                    quantity: Int(entity.quantity)
+                )
             }
         }
     }
-    
 }
+
