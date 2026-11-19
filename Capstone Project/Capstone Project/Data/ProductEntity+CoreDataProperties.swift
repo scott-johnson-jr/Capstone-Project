@@ -1,19 +1,10 @@
-//
-//  ProductEntity+CoreDataProperties.swift
-//  Capstone Project
-//
-//  Created by user301577 on 10/21/26.
-//
-//
 
 public import Foundation
 public import CoreData
 
-
 public typealias ProductEntityCoreDataPropertiesSet = NSSet
 
 extension ProductEntity {
-
     @nonobjc public class func fetchRequest() -> NSFetchRequest<ProductEntity> {
         return NSFetchRequest<ProductEntity>(entityName: "ProductEntity")
     }
@@ -33,8 +24,16 @@ extension ProductEntity {
     @NSManaged public var accentRaw: String?
     @NSManaged public var lastUpdated: Date?
 
+    // New API product attributes
+    @NSManaged public var productId: Int64
+    @NSManaged public var productNumber: String?
+    @NSManaged public var warranty: String?
+    @NSManaged public var color: String?
+    @NSManaged public var stockLevel: Int64
+    @NSManaged public var isSaved: Bool
+    @NSManaged public var lastViewedAt: Date?
 }
 
-extension ProductEntity : Identifiable {
-
+extension ProductEntity: Identifiable {
 }
+

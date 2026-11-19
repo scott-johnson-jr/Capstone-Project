@@ -40,3 +40,12 @@ struct ProductRepositoryKey: EnvironmentKey {
 }
 
 
+
+struct SavedProductsRepositoryKey: EnvironmentKey {
+    static let defaultValue = SavedProductsRepository()
+}
+
+
+struct BrowsingHistoryRepositoryKey: EnvironmentKey {
+    static let defaultValue = BrowsingHistoryRepository()
+}
