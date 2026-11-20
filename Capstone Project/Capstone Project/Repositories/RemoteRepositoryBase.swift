@@ -10,12 +10,9 @@ internal import CoreData
 
 class RemoteRepositoryBase<Item: Codable> {
     
-    private var authStatus: AuthStatus
-    
     var implicitContext: NSManagedObjectContext?
     
     init(authStatus: AuthStatus) {
-        self.authStatus = authStatus
     }
     
     
@@ -128,19 +125,18 @@ class RemoteRepositoryBase<Item: Codable> {
             throw NetworkError.invalidURL
         }
         
-        var request = URLRequest(url: url)
-        guard let auth = authStatus.authToken, !auth.isEmpty else {
-            throw NetworkError.missingAuthToken
-        }
-            request.setValue("Bearer \(auth)", forHTTPHeaderField: "Authorization")
-        
-        
-        return request
+        return URLRequest(url: url)
     }
     // MARK: execute request
     private func executeRequest(_ request: URLRequest, isRetry: Bool = false) async throws -> Data {
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let token = try await currentAccessToken()
+        
+        // create a copy of the original request, as it is a let constant
+        var authorizedRequest = request
+        authorizedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: authorizedRequest)
         
         guard let http = response as? HTTPURLResponse else {
             throw NetworkError.badResponse(statusCode: -1)
@@ -149,30 +145,17 @@ class RemoteRepositoryBase<Item: Codable> {
         guard (200...299).contains(http.statusCode) else {
             if http.statusCode == 401 {
                 
-                guard !isRetry,
-                        let refresh = authStatus.refreshToken,
-                        !refresh.isEmpty,
-                      let auth = authStatus.authToken,
-                        !auth.isEmpty else {
+                guard !isRetry else {
                     throw NetworkError.unauthorized
                 }
                 // try to refresh the auth token
-                let refreshResult = try await AuthService.shared.refreshToken(authToken: auth,
-                                              refreshToken: refresh)
-                
-                guard refreshResult.success else {
+                do {
+                    try await AuthManager.shared.refreshSession()
+                } catch is AuthError {
                     throw NetworkError.unauthorized
                 }
                 
-                authStatus.updateLoginStatus(success: refreshResult.success,
-                                             authToken: refreshResult.accessToken,
-                                             refreshToken: refreshResult.refreshToken)
-                
-                // create a copy of the original request, as it is a let constant
-                    var newRequest = request
-                newRequest.setValue("Bearer \(authStatus.authToken!)", forHTTPHeaderField: "Authorization")
-                
-                return try await executeRequest(newRequest, isRetry: true)
+                return try await executeRequest(request, isRetry: true)
             }
             throw NetworkError.badResponse(statusCode: http.statusCode)
         }
@@ -181,6 +164,12 @@ class RemoteRepositoryBase<Item: Codable> {
         
     }
     
+    private func currentAccessToken() async throws -> String {
+        do {
+            return try await AuthManager.shared.validAccessToken()
+        } catch is AuthError {
+            throw NetworkError.unauthorized
+        }
+    }
+    
 }
-
-

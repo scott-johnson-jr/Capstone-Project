@@ -7,7 +7,6 @@ struct ContentView: View {
     @Environment(\.orderRepository) private var orderRepository
     @EnvironmentObject private var authStatus: AuthStatus
 
-    @State private var isLoggedIn = false
     @State private var current: String = "welcome"
     @State private var showDrawer: Bool = false
 
@@ -91,8 +90,7 @@ struct ContentView: View {
                     HStack(spacing: 0) {
                         DrawerView(
                             current: $current,
-                            showDrawer: $showDrawer,
-                            isLoggedIn: $isLoggedIn
+                            showDrawer: $showDrawer
                         )
                         .frame(width: 250)
                         .offset(x: showDrawer ? 0 : -250)
@@ -117,8 +115,6 @@ struct ContentView: View {
         @Binding var showDrawer: Bool
 
         @EnvironmentObject private var authStatus: AuthStatus
-
-        @Binding var isLoggedIn: Bool
 
         var body: some View {
             VStack(alignment: .leading, spacing: 0) {
@@ -222,11 +218,8 @@ struct ContentView: View {
                 Divider()
 
                 Button {
-                    authStatus.updateLoginStatus(
-                        success: false,
-                        authToken: nil,
-                        refreshToken: nil
-                    )
+                    Task { await AuthManager.shared.logout() }
+                    authStatus.setLoggedIn(false)
                     current = "welcome"
                     closeDrawer()
                 } label: {

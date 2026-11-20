@@ -1,3 +1,4 @@
+
 import SwiftUI
 
 struct EmployeeEditView: View {
@@ -17,17 +18,45 @@ struct EmployeeEditView: View {
     @State private var endDate = Date()
     @State private var hasEndDate = false
     @State private var firstName = ""
+    @State private var middleName = ""
     @State private var lastName = ""
+    @State private var suffix = ""
 
     @State private var isSaving = false
     @State private var errorMessage: String?
+
+    private var personalChanged: Bool {
+        firstName.trimmingCharacters(in: .whitespacesAndNewlines) != employee.firstName ||
+        middleName.trimmingCharacters(in: .whitespacesAndNewlines) != (employee.middleName ?? "") ||
+        lastName.trimmingCharacters(in: .whitespacesAndNewlines) != employee.lastName ||
+        suffix.trimmingCharacters(in: .whitespacesAndNewlines) != (employee.suffix ?? "")
+    }
+
+    private var employmentChanged: Bool {
+        guard let history = employee.shiftHistory?.first else {
+            return true
+        }
+
+        return title.trimmingCharacters(in: .whitespacesAndNewlines) != (employee.title ?? "") ||
+        employeeNumber.trimmingCharacters(in: .whitespacesAndNewlines) != (employee.employeeNumber ?? "") ||
+        departmentId != history.departmentId ||
+        shiftId != history.shiftId ||
+        !Calendar.current.isDate(startDate, inSameDayAs: history.startDate) ||
+        hasEndDate != (history.endDate != nil) ||
+        (hasEndDate && !Calendar.current.isDate(
+            endDate,
+            inSameDayAs: history.endDate ?? endDate
+        ))
+    }
 
     var body: some View {
         Form {
             Section("Employee") {
                 TextField("First Name", text: $firstName)
+                TextField("Middle Name", text: $middleName)
                 TextField("Last Name", text: $lastName)
-                
+                TextField("Suffix", text: $suffix)
+
                 LabeledContent(
                     "Employee ID",
                     value: "\(employee.employeeId)"
@@ -54,12 +83,20 @@ struct EmployeeEditView: View {
             }
 
             Section("Shift Dates") {
-                DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                DatePicker(
+                    "Start Date",
+                    selection: $startDate,
+                    displayedComponents: .date
+                )
 
                 Toggle("Has end date", isOn: $hasEndDate)
 
                 if hasEndDate {
-                    DatePicker("End Date", selection: $endDate, displayedComponents: .date)
+                    DatePicker(
+                        "End Date",
+                        selection: $endDate,
+                        displayedComponents: .date
+                    )
                 }
             }
 
@@ -84,16 +121,15 @@ struct EmployeeEditView: View {
                 }
                 .disabled(
                     isSaving ||
-                    employeeNumber.trimmingCharacters(
-                        in: .whitespacesAndNewlines
-                        
-                    ).isEmpty ||
                     firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                     lastName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                    departmentId == 0 ||
-                    shiftId == 0 ||
-                    (hasEndDate && endDate < startDate)
-                    
+                    (employmentChanged && (
+                        employeeNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        departmentId == 0 ||
+                        shiftId == 0 ||
+                        (hasEndDate && endDate < startDate)
+                    )) ||
+                    (!personalChanged && !employmentChanged)
                 )
             }
         }
@@ -114,12 +150,15 @@ struct EmployeeEditView: View {
             title = employee.title ?? ""
             employeeNumber = employee.employeeNumber ?? ""
             firstName = employee.firstName
+            middleName = employee.middleName ?? ""
             lastName = employee.lastName
+            suffix = employee.suffix ?? ""
 
             if let history = employee.shiftHistory?.first {
                 departmentId = history.departmentId
                 shiftId = history.shiftId
                 startDate = history.startDate
+
                 if let end = history.endDate {
                     endDate = end
                     hasEndDate = true
@@ -135,20 +174,49 @@ struct EmployeeEditView: View {
         errorMessage = nil
 
         do {
-            try await repository.updateEmployee(
-                employeeId: employee.employeeId,
-                firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-                title: title.trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                ),
-                employeeNumber: employeeNumber.trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                ),
-                departmentId: departmentId,
-                shiftId: shiftId,
-                startDate: startDate,
-                endDate: hasEndDate ? endDate : nil            )
+            
+            print("Personal changed: \(personalChanged)")
+            print("Employment changed: \(employmentChanged)")
+
+            if personalChanged {
+                try await repository.updateEmployeePersonal(
+                    employeeId: employee.employeeId,
+                    firstName: firstName.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    middleName: middleName.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    lastName: lastName.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    suffix: suffix.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                )
+            }
+
+            if employmentChanged {
+                try await repository.updateEmployee(
+                    employeeId: employee.employeeId,
+                    firstName: firstName.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    lastName: lastName.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    title: title.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    employeeNumber: employeeNumber.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                    departmentId: departmentId,
+                    shiftId: shiftId,
+                    startDate: startDate,
+                    endDate: hasEndDate ? endDate : nil
+                )
+            }
 
             await onSaved()
             dismiss()
