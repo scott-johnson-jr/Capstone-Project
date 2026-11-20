@@ -203,24 +203,12 @@ class RemoteEmployeeDirectoryRepository: RepositoryProtocol {
 
 
         
-        let (data, response) = try await URLSession.shared.data(
-            for: request
-        )
+        let (_, response) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse else {
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200..<300).contains(httpResponse.statusCode) else {
             throw URLError(.badServerResponse)
         }
-
-        print("Employment update status: \(httpResponse.statusCode)")
-
-        if let responseBody = String(data: data, encoding: .utf8) {
-            print("Employment update response: \(responseBody)")
-        }
-
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-
 
         cachedEmployees = nil
         cacheTimestamp = nil
