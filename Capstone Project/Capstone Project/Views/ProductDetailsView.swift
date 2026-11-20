@@ -45,7 +45,6 @@ struct ProductDetailView: View {
         .background(Color.catalogBackground)
         .navigationTitle(product.name)
         .safeAreaInset(edge: .bottom) {
-            addButton
         }
         .task {
             await recordProductView()
@@ -194,31 +193,6 @@ struct ProductDetailView: View {
         )
     }
 
-    private var addButton: some View {
-        Button {
-            added = true
-        } label: {
-            Text(
-                added
-                    ? "Added to bag"
-                    : "Add to bag · \(product.listPrice.currencyString)"
-            )
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                Color.primary,
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-            )
-            .foregroundStyle(Color.catalogBackground)
-        }
-        .buttonStyle(.plain)
-        .disabled(added)
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
-        .background(.ultraThinMaterial)
-    }
 
     // Record this product in browsing history.
     private func recordProductView() async {
