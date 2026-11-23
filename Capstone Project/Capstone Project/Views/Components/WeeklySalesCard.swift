@@ -50,7 +50,7 @@ struct WeeklySalesCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Text("$\(totalSales, specifier: "%.2f")")
-                            .font(.title3)
+                            .font(.headline)
                             .bold()
                             .foregroundColor(.blue)
                     }
@@ -60,7 +60,7 @@ struct WeeklySalesCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Text("$\(totalProfit, specifier: "%.2f")")
-                            .font(.title3)
+                            .font(.headline)
                             .bold()
                             .foregroundColor(.orange)
                     }
