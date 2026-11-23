@@ -48,13 +48,13 @@ struct ContentView: View {
                             CatalogView()
                                 .accessibilityIdentifier("productView")
 
-                        case "savedProducts":
-                            SavedProductsView()
-                                .accessibilityIdentifier("savedProductsView")
-
-                        case "browsingHistory":
-                            BrowsingHistoryView()
-                                .accessibilityIdentifier("browsingHistoryView")
+//                        case "savedProducts":
+//                            SavedProductsView()
+//                                .accessibilityIdentifier("savedProductsView")
+//
+//                        case "browsingHistory":
+//                            BrowsingHistoryView()
+//                                .accessibilityIdentifier("browsingHistoryView")
 
                         default:
                             WelcomeView()
@@ -187,33 +187,33 @@ struct ContentView: View {
                 .accessibilityIdentifier("productCatalogViewButton")
 
                 // Saved Products
-                Button {
-                    current = "savedProducts"
-                    closeDrawer()
-                } label: {
-                    Label("Saved Products", systemImage: "bookmark")
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 20)
-                }
-                .accessibilityIdentifier("savedProductsViewButton")
-
-                // Browsing History
-                Button {
-                    current = "browsingHistory"
-                    closeDrawer()
-                } label: {
-                    Label(
-                        "Browsing History",
-                        systemImage: "clock.arrow.circlepath"
-                    )
-                    .foregroundColor(.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-                }
-                .accessibilityIdentifier("browsingHistoryViewButton")
+//                Button {
+//                    current = "savedProducts"
+//                    closeDrawer()
+//                } label: {
+//                    Label("Saved Products", systemImage: "bookmark")
+//                        .foregroundColor(.primary)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                        .padding(.vertical, 12)
+//                        .padding(.horizontal, 20)
+//                }
+//                .accessibilityIdentifier("savedProductsViewButton")
+//
+//                // Browsing History
+//                Button {
+//                    current = "browsingHistory"
+//                    closeDrawer()
+//                } label: {
+//                    Label(
+//                        "Browsing History",
+//                        systemImage: "clock.arrow.circlepath"
+//                    )
+//                    .foregroundColor(.primary)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    .padding(.vertical, 12)
+//                    .padding(.horizontal, 20)
+//                }
+//                .accessibilityIdentifier("browsingHistoryViewButton")
 
                 Divider()
 

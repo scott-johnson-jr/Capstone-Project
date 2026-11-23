@@ -23,16 +23,17 @@ struct LowStockBadgeCard: View {
             VStack{
                 Text("Low Stock Warnings!")
                     .font(.title)
+                    .multilineTextAlignment(.center)
                 
-                HStack {
+                HStack(spacing: 8) {
                     Text("\(count)")
                         .foregroundColor(.red)
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(12)
         }

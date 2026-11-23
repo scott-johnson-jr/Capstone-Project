@@ -106,17 +106,11 @@ struct InventoryView: View {
                                         .font(.footnote)
 
                                     if item.isLowStock {
-                                        HStack {
-                                            Spacer()
-
                                             Label(
                                                 "Low Stock",
                                                 systemImage: "exclamationmark.triangle"
                                             )
                                             .foregroundStyle(.red)
-
-                                            Spacer()
-                                        }
                                     }
                                 }
                                 .padding(.vertical, 4)

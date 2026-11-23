@@ -48,7 +48,7 @@ struct ProductDetailView: View {
         }
         .task {
             await recordProductView()
-            await loadSavedStatus()
+//            await loadSavedStatus()
         }
         .alert(
             "Product Details",
@@ -92,28 +92,28 @@ struct ProductDetailView: View {
 
                 Spacer()
 
-                Button {
-                    Task {
-                        await toggleSaved()
-                    }
-                } label: {
-                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
-                        .font(.title2)
-                        .foregroundStyle(.primary)
-                        .padding(12)
-                        .background(
-                            Color.cardBackground,
-                            in: Circle()
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(isSaving)
-                .accessibilityLabel(
-                    isSaved ? "Remove from saved products" : "Save product"
-                )
-                .accessibilityHint(
-                    "Adds or removes this product from your saved products."
-                )
+//                Button {
+//                    Task {
+//                        await toggleSaved()
+//                    }
+//                } label: {
+//                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+//                        .font(.title2)
+//                        .foregroundStyle(.primary)
+//                        .padding(12)
+//                        .background(
+//                            Color.cardBackground,
+//                            in: Circle()
+//                        )
+//                }
+//                .buttonStyle(.plain)
+//                .disabled(isSaving)
+//                .accessibilityLabel(
+//                    isSaved ? "Remove from saved products" : "Save product"
+//                )
+//                .accessibilityHint(
+//                    "Adds or removes this product from your saved products."
+//                )
             }
         }
     }
