@@ -30,16 +30,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A20F0274306EAC6B002059F0 /* Inventory */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Inventory;
-			sourceTree = "<group>";
-		};
-		A20F0278306EACAB002059F0 /* Networking */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Networking;
-			sourceTree = "<group>";
-		};
 		A28D99EA30671FEB00248D30 /* Capstone Project */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Capstone Project";
@@ -86,8 +76,6 @@
 			isa = PBXGroup;
 			children = (
 				A28D99EA30671FEB00248D30 /* Capstone Project */,
-				A20F0278306EACAB002059F0 /* Networking */,
-				A20F0274306EAC6B002059F0 /* Inventory */,
 				A28D99F830671FED00248D30 /* Capstone ProjectTests */,
 				A28D9A0230671FED00248D30 /* Capstone ProjectUITests */,
 				A28D99E930671FEB00248D30 /* Products */,
@@ -120,8 +108,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A20F0274306EAC6B002059F0 /* Inventory */,
-				A20F0278306EACAB002059F0 /* Networking */,
 				A28D99EA30671FEB00248D30 /* Capstone Project */,
 			);
 			name = "Capstone Project";

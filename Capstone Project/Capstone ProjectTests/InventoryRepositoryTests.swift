@@ -4,10 +4,11 @@ import CoreData
 import Testing
 @testable import Capstone_Project
 
+@MainActor
 struct InventoryRepositoryTests {
 
     @Test func cachedInventoryIsReturnedWhenAPIFails() async throws {
-        let context = makeContext()
+        let context = try await makeContext()
         let api = MockInventoryAPI(shouldFail: true)
 
         let entity = InventoryEntity(context: context)
@@ -37,8 +38,8 @@ struct InventoryRepositoryTests {
         #expect(result.items.first?.productName == "Test Product")
     }
 
-    @Test func apiFailureWithoutCacheThrowsError() async {
-        let context = makeContext()
+    @Test func apiFailureWithoutCacheThrowsError() async throws {
+        let context = try await makeContext()
         let api = MockInventoryAPI(shouldFail: true)
 
         let repository = InventoryRepository(
@@ -50,12 +51,13 @@ struct InventoryRepositoryTests {
             _ = try await repository.fetchInventory()
             Issue.record("Expected API failure")
         } catch {
-            #expect(true)
+            #expect(error is URLError)
         }
     }
 
-    private func makeContext() -> NSManagedObjectContext {
+    private func makeContext() async throws -> NSManagedObjectContext {
         let model = PersistenceController.shared.container.managedObjectModel
+
         let container = NSPersistentContainer(
             name: "TestContainer",
             managedObjectModel: model
@@ -65,16 +67,17 @@ struct InventoryRepositoryTests {
         description.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [description]
 
-        let semaphore = DispatchSemaphore(value: 0)
+        try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<Void, Error>) in
 
-        container.loadPersistentStores { _, error in
-            if let error {
-                fatalError("Failed to create test store: \(error)")
+            container.loadPersistentStores { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
             }
-            semaphore.signal()
         }
-
-        semaphore.wait()
 
         return container.viewContext
     }

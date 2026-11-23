@@ -12,11 +12,11 @@ protocol InventoryRepositoryProtocol {
 }
 
 final class InventoryRepository: InventoryRepositoryProtocol {
-    private let apiClient: APIClient
+    private let apiClient: any InventoryAPIProtocol
     private let context: NSManagedObjectContext
 
     init(
-        apiClient: APIClient,
+        apiClient: any InventoryAPIProtocol,
         context: NSManagedObjectContext = PersistenceController.shared.container.viewContext
     ) {
         self.apiClient = apiClient

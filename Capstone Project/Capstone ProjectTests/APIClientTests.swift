@@ -11,6 +11,8 @@ import Foundation
 import Testing
 @testable import Capstone_Project
 
+@Suite(.serialized)
+@MainActor
 struct APIClientTests {
 
     @Test func successfulResponseDecodesJSON() async throws {
