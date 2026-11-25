@@ -1,0 +1,31 @@
+# Test Report — Capstone Project (iOS)
+
+## Current Test Suite Summary
+
+*   **Unit Tests (Swift `Testing`):**
+    *   `APIClientTests` (`@Suite(.serialized)`): Tests `200` JSON decoding, HTTP `500` `APIError.httpError(500)`, and invalid JSON `DecodingError` using `URLSessionConfiguration.ephemeral` and `MockURLProtocol`.
+    *   `InventoryRepositoryTests`: Uses an in-memory Core Data store (`NSInMemoryStoreType` with `PersistenceController.shared.container.managedObjectModel`) and `MockInventoryAPI` to verify cached `InventoryEntity` fallback (`isFromCache == true`) on API failure and `URLError` propagation when cache is empty.
+    *   `InventoryFetchResultTests` & `Capstone_ProjectTests`: Verify `InventoryFetchResult` `isFromCache` behavior for cached (`true`) and fresh (`false`) results.
+*   **UI Tests (`Capstone_ProjectUITests` — `XCTest`):**
+    *   `testExample`: Launches `XCUIApplication()` (placeholder assertion step).
+    *   `testLaunchPerformance`: Measures app launch via `XCTApplicationLaunchMetric()`.
+*   **Launch Tests (`Capstone_ProjectUITestsLaunchTests` — `XCTest`):**
+    *   `testLaunch`: Launches the app and attaches a `"Launch Screen"` screenshot.
+
+## Coverage Priorities
+
+1.  **Authentication & Session Lifecycle:** Testing `AuthViewModel` login/refresh/logout state transitions, `AuthService` token refresh (`200`, `401`, decoding failure), and `KeychainHelper` save/read/delete behavior.
+2.  **API Client & Repository Layer:** Expanding `APIClient` tests for invalid URLs, non-HTTP responses, `401`/`404` status codes, query/endpoint paths, and repository decoding/error handling (including Core Data write/update paths in `InventoryRepository`).
+3.  **Feature ViewModels & Filtering/Analytics:** Unit testing dashboard metrics, inventory/product search & filtering, orders, and employee flows.
+4.  **Core UI Journeys & Accessibility:** Replacing the placeholder UI test with real user flows (sign-in, tab/screen navigation, error/empty states) plus VoiceOver and Dynamic Type checks.
+
+## Unresolved Defects & Gaps
+
+| ID | Summary | Severity | Notes / Follow-Up |
+| :--- | :--- | :--- | :--- |
+| GAP-01 | Logout does not clear Keychain credentials | Medium | `AuthViewModel.logout()` resets `isLoggedIn` and `userName` in memory and has a TODO comment for Keychain deletion. |
+| GAP-02 | `AuthViewModel` and `AuthService` method alignment | Medium | `AuthViewModel` calls `auth.login(loginId:password:)` and `auth.refresh()`, while `AuthService.swift` shows `refreshToken(authToken:refreshToken:)`; verify full auth implementation. |
+| GAP-03 | `APIClient` lacks bearer token header & dynamic config | Medium | `APIClient.get` uses a hardcoded `baseURL` and does not attach auth headers; check `/api` path consistency with repository `urlBase` strings. |
+| GAP-04 | Overlapping `InventoryFetchResult` tests & limited breadth | Low | `InventoryFetchResult` cache flag tests are duplicated across `Capstone_ProjectTests` and `InventoryFetchResultTests`; add ViewModel, repository, and UI flow assertions. |
+| GAP-05 | Placeholder UI test & `MockURLProtocol` static state | Low | `Capstone_ProjectUITests.testExample()` only launches the app; `MockURLProtocol.requestHandler` uses static state (safe under `.serialized`, avoid parallel mutation). |
+
